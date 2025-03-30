@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Connections - Alumni Network{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Find Alumni</h4>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('connections') }}" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="search" placeholder="Search by name, job, or location" 
+                                   value="{{ request.args.get('search', '') }}">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </form>
+
+                    <div class="list-group">
+                        {% for user in users %}
+                        <div class="connection-card">
+                            <img src="{{ user.profile.avatar if user.profile and user.profile.avatar else url_for('static', filename='uploads/default-avatar.png') }}" 
+                                 alt="{{ user.username }}" class="connection-avatar">
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">{{ user.username }}</h5>
+                                {% if user.profile %}
+                                <p class="mb-1">{{ user.profile.current_job }}</p>
+                                <p class="mb-1 text-muted">{{ user.profile.location }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="ms-3">
+                                {% if user.id in current_user.connections %}
+                                <span class="badge bg-success">Connected</span>
+                                {% else %}
+                                <form method="POST" action="{{ url_for('send_connection_request', user_id=user.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">Connect</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No alumni found.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Connection Requests</h4>
+                </div>
+                <div class="card-body">
+                    {% for request in connection_requests %}
+                    <div class="connection-request mb-3">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ request.sender.profile.avatar if request.sender.profile and request.sender.profile.avatar else url_for('static', filename='uploads/default-avatar.png') }}" 
+                                 alt="{{ request.sender.username }}" class="connection-avatar">
+                            <div class="ms-3">
+                                <h6 class="mb-0">{{ request.sender.username }}</h6>
+                                <small class="text-muted">{{ request.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <form method="POST" action="{{ url_for('accept_connection_request', request_id=request.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('reject_connection_request', request_id=request.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Reject</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No pending connection requests.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4>My Connections</h4>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for connection in current_user.connections %}
+                        <a href="{{ url_for('user_profile', username=connection.username) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex align-items-center">
+                                <img src="{{ connection.profile.avatar if connection.profile and connection.profile.avatar else url_for('static', filename='uploads/default-avatar.png') }}" 
+                                     alt="{{ connection.username }}" class="connection-avatar">
+                                <div class="ms-3">
+                                    <h6 class="mb-0">{{ connection.username }}</h6>
+                                    {% if connection.profile %}
+                                    <small class="text-muted">{{ connection.profile.current_job }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                        {% else %}
+                        <p class="text-muted">No connections yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

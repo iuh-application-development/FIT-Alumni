@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Alumni Network{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        {% if current_user.is_authenticated %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Create New Post</h5>
+                <form method="POST" action="{{ url_for('create_post') }}">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="title" placeholder="Post Title" required>
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control" name="content" rows="3" placeholder="What's on your mind?" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Post</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <h3 class="mb-4">Latest Posts</h3>
+        {% for post in posts %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title">{{ post.title }}</h5>
+                    <small class="text-muted">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                <p class="card-text">{{ post.content }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">Posted by {{ post.author.username }}</small>
+                    <a href="{{ url_for('post_detail', post_id=post.id) }}" class="btn btn-outline-primary btn-sm">Read More</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No posts yet. Be the first to share something!
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="col-md-4">
+        {% if current_user.is_authenticated %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Quick Actions</h5>
+                <div class="list-group">
+                    <a href="{{ url_for('profile') }}" class="list-group-item list-group-item-action">View Profile</a>
+                    <a href="{{ url_for('connections') }}" class="list-group-item list-group-item-action">Find Connections</a>
+                    <a href="{{ url_for('jobs') }}" class="list-group-item list-group-item-action">Browse Jobs</a>
+                    <a href="{{ url_for('events') }}" class="list-group-item list-group-item-action">Upcoming Events</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Join Our Network</h5>
+                <p class="card-text">Connect with fellow alumni, share experiences, and grow your professional network.</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">Register Now</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary">Login</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

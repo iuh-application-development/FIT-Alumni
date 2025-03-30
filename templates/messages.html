@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Messages - Alumni Network{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Conversations</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for conversation in conversations %}
+                        <a href="{{ url_for('messages', user_id=conversation.user.id) }}" 
+                           class="list-group-item list-group-item-action {% if conversation.user.id == current_chat_user.id %}active{% endif %}">
+                            <div class="d-flex align-items-center">
+                                <img src="{{ conversation.user.profile.avatar if conversation.user.profile and conversation.user.profile.avatar else url_for('static', filename='uploads/default-avatar.png') }}" 
+                                     alt="{{ conversation.user.username }}" class="connection-avatar">
+                                <div class="ms-3">
+                                    <h6 class="mb-0">{{ conversation.user.username }}</h6>
+                                    <small class="text-muted">{{ conversation.last_message.content[:50] }}...</small>
+                                </div>
+                                {% if conversation.unread_count > 0 %}
+                                <span class="badge bg-primary rounded-pill ms-auto">{{ conversation.unread_count }}</span>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% else %}
+                        <div class="list-group-item">
+                            <p class="text-muted mb-0">No conversations yet.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            {% if current_chat_user %}
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <img src="{{ current_chat_user.profile.avatar if current_chat_user.profile and current_chat_user.profile.avatar else url_for('static', filename='uploads/default-avatar.png') }}" 
+                             alt="{{ current_chat_user.username }}" class="connection-avatar">
+                        <div class="ms-3">
+                            <h5 class="mb-0">{{ current_chat_user.username }}</h5>
+                            {% if current_chat_user.profile %}
+                            <small class="text-muted">{{ current_chat_user.profile.current_job }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                    {% for message in messages %}
+                    <div class="message-thread mb-3 {% if message.sender_id == current_user.id %}text-end{% endif %}">
+                        <div class="message-content d-inline-block p-2 rounded {% if message.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light{% endif %}">
+                            {{ message.content }}
+                        </div>
+                        <small class="text-muted d-block mt-1">{{ message.created_at.strftime('%I:%M %p') }}</small>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted mt-5">
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="card-footer">
+                    <form method="POST" action="{{ url_for('send_message', user_id=current_chat_user.id) }}" class="d-flex">
+                        <input type="text" class="form-control me-2" name="content" placeholder="Type your message..." required>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5>Select a conversation</h5>
+                    <p class="text-muted">Choose a conversation from the list to start messaging.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- New Message Modal -->
+<div class="modal fade" id="newMessageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('send_message', user_id=0) }}">
+                    <div class="mb-3">
+                        <label for="recipient" class="form-label">To</label>
+                        <select class="form-select" id="recipient" name="recipient_id" required>
+                            <option value="">Select recipient</option>
+                            {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message_content" class="form-label">Message</label>
+                        <textarea class="form-control" id="message_content" name="content" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
