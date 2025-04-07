@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}{{ alumni.user.profile.full_name }} - Alumni Network{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                {% if alumni.user.profile.avatar %}
+                <img src="{{ url_for('static', filename=alumni.user.profile.avatar) }}" class="card-img-top" alt="{{ alumni.user.profile.full_name }}">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/default-avatar.png') }}" class="card-img-top" alt="Default avatar">
+                {% endif %}
+                <div class="card-body text-center">
+                    <h4 class="card-title">{{ alumni.user.profile.full_name }}</h4>
+                    <p class="text-muted">{{ alumni.graduation_year }} - {{ alumni.major }}</p>
+                    <p class="card-text">{{ alumni.current_position }}</p>
+                    <p class="card-text">{{ alumni.company }}</p>
+                    {% if current_user.is_authenticated and current_user.id == alumni.user_id %}
+                    <a href="{{ url_for('update_alumni_info') }}" class="btn btn-primary">Cập nhật thông tin</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Details -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Thành Tích</h5>
+                    <div class="card-text">
+                        {{ alumni.achievements|safe if alumni.achievements else 'Chưa có thông tin' }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Đóng Góp Cho Trường</h5>
+                    <div class="card-text">
+                        {{ alumni.contributions|safe if alumni.contributions else 'Chưa có thông tin' }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Posts -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Bài Viết Gần Đây</h5>
+                    {% for post in alumni.user.posts[:5] %}
+                    <div class="mb-3">
+                        <h6>{{ post.title }}</h6>
+                        <p class="text-muted small">{{ post.created_at.strftime('%d/%m/%Y') }}</p>
+                        <p>{{ post.content[:200] }}...</p>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Chưa có bài viết nào</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

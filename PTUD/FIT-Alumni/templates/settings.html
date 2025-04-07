@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Alumni Network{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Account Settings</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('update_settings') }}">
+                        <div class="mb-3">
+                            <label for="email_notifications" class="form-label">Email Notifications</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="email_notifications" name="email_notifications">
+                                <label class="form-check-label" for="email_notifications">
+                                    Receive email notifications for new messages and events
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="profile_visibility" class="form-label">Profile Visibility</label>
+                            <select class="form-select" id="profile_visibility" name="profile_visibility">
+                                <option value="public">Public</option>
+                                <option value="connections">Connections Only</option>
+                                <option value="private">Private</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="language" class="form-label">Preferred Language</label>
+                            <select class="form-select" id="language" name="language">
+                                <option value="en">English</option>
+                                <option value="vi">Vietnamese</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="timezone" class="form-label">Timezone</label>
+                            <select class="form-select" id="timezone" name="timezone">
+                                <option value="UTC">UTC</option>
+                                <option value="Asia/Ho_Chi_Minh">Ho Chi Minh City (GMT+7)</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Security Settings</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('update_password') }}">
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-key me-2"></i>Change Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Account Deletion</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Once you delete your account, there is no going back. Please be certain.</p>
+                    <form method="POST" action="{{ url_for('delete_account') }}" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt me-2"></i>Delete Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

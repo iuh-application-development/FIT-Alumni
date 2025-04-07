@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Văn Bản - Alumni Network{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Văn Bản</h1>
+
+    <div class="row">
+        <!-- Quy chế, quy định -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Quy chế, quy định
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for doc in documents.regulations %}
+                        <a href="{{ url_for('static', filename='documents/' + doc.file) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            <i class="far fa-file-pdf text-danger me-2"></i>
+                            {{ doc.title }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu mẫu -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h2 class="h5 mb-0">
+                        <i class="fas fa-file-signature me-2"></i>
+                        Biểu mẫu
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for doc in documents.forms %}
+                        <a href="{{ url_for('static', filename='documents/' + doc.file) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            <i class="far fa-file-pdf text-danger me-2"></i>
+                            {{ doc.title }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Báo cáo, kế hoạch -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h2 class="h5 mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Báo cáo, kế hoạch
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for doc in documents.reports %}
+                        <a href="{{ url_for('static', filename='documents/' + doc.file) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            <i class="far fa-file-pdf text-danger me-2"></i>
+                            {{ doc.title }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tìm kiếm và lọc -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="h5 mb-3">Tìm kiếm văn bản</h3>
+                    <form class="row g-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" placeholder="Nhập từ khóa...">
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select">
+                                <option selected>Tất cả loại văn bản</option>
+                                <option>Quy chế, quy định</option>
+                                <option>Biểu mẫu</option>
+                                <option>Báo cáo, kế hoạch</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="h5 mb-3">Hướng dẫn</h3>
+                    <p class="mb-0">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        Nhấp vào tên văn bản để tải xuống file PDF.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

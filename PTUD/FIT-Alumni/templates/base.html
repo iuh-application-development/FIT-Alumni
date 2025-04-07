@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+            padding: 0.5rem 1rem;
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            padding: 0;
+        }
+        .navbar-brand img {
+            height: 50px;
+            margin-right: 10px;
+        }
+        .navbar-brand span {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00529b;
+        }
+        .navbar-nav .nav-link {
+            color: #333;
+            font-weight: 500;
+            padding: 1rem 1.5rem;
+            transition: color 0.3s;
+        }
+        .navbar-nav .nav-link:hover {
+            color: #00529b;
+        }
+        .main-content {
+            margin-top: 2rem;
+            min-height: calc(100vh - 160px);
+        }
+        .footer {
+            background-color: #1a237e;
+            color: white;
+            padding: 3rem 0;
+            margin-top: 2rem;
+        }
+        .footer h5 {
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+        .footer a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: #e0e0e0;
+        }
+        .footer ul li {
+            margin-bottom: 0.5rem;
+        }
+        .footer i {
+            margin-right: 10px;
+        }
+        .footer .social-icons a {
+            font-size: 1.2rem;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/iuh_logo.png') }}" alt="IUH Logo">
+                <span>TRƯỜNG ĐẠI HỌC CÔNG NGHIỆP TP.HCM</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Trang Chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('alumni') }}">Kết Nối Cựu Sinh Viên</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('documents') }}">Văn bản</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student_support') }}">Hỗ trợ sinh viên</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about') }}">Giới Thiệu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('contact') }}">Liên hệ</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i>
+                            {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('profile') }}">Hồ sơ</a></li>
+                            {% if current_user.is_admin %}
+                            <li><a class="dropdown-item" href="{{ url_for('admin') }}">Quản trị</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Đăng nhập</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>CHUYÊN TRANG CỰU SINH VIÊN - ĐHCN TP.HCM</h5>
+                    <p>
+                        <i class="fas fa-map-marker-alt"></i> Trung tâm Kết nối doanh nghiệp và Giới thiệu việc làm - Tầng trệt - Nhà A - 12 Nguyễn Văn Bảo, P.4 Gò Vấp, Thành phố Hồ Chí Minh
+                    </p>
+                    <p>
+                        <i class="fas fa-phone"></i> 0906.620.858<br>
+                        <i class="fas fa-phone"></i> 028. 3985.5789<br>
+                        <i class="fas fa-envelope"></i> tttv_htsv@iuh.edu.vn
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <h5>CÁC CỔNG THÔNG TIN</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Công thông tin sinh viên</a></li>
+                        <li><a href="#">Công thông tin giảng viên</a></li>
+                        <li><a href="#">Quản lý khoa học</a></li>
+                        <li><a href="#">Điểm rèn luyện sinh viên</a></li>
+                        <li><a href="#">Công thông tin việc làm</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>THÔNG TIN MỞ RỘNG</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Báo chí viết về IUH</a></li>
+                        <li><a href="#">Khám phá IUH</a></li>
+                        <li><a href="#">Kỹ năng mềm</a></li>
+                        <li><a href="#">Bộ sưu tập</a></li>
+                        <li><a href="#">Dịch vụ khách hàng</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <p class="mb-0">© BẢN QUYỀN 2025 - CHUYÊN TRANG CỰU SINH VIÊN - ĐHCN TP.HCM</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <a href="#" class="me-3"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="me-3"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

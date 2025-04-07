@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - Cựu Sinh Viên IUH{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ post.title }}</li>
+        </ol>
+    </nav>
+
+    <article class="blog-post">
+        <div class="text-center mb-4">
+            <img src="{{ url_for('static', filename='images/' + post.image) }}" class="img-fluid rounded" alt="{{ post.title }}">
+        </div>
+        
+        <h1 class="blog-post-title mb-3">{{ post.title }}</h1>
+        
+        <div class="blog-post-meta text-muted mb-4">
+            <span><i class="far fa-calendar-alt me-2"></i>{{ post.created_at.strftime('%d/%m/%Y') }}</span>
+            <span class="ms-3"><i class="far fa-user me-2"></i>{{ post.author.username }}</span>
+        </div>
+
+        <div class="blog-post-content">
+            {{ post.content }}
+        </div>
+
+        {% if post.url %}
+        <div class="mt-4">
+            <a href="{{ post.url }}" target="_blank" class="btn btn-primary">
+                Đọc bài viết gốc <i class="fas fa-external-link-alt ms-1"></i>
+            </a>
+        </div>
+        {% endif %}
+    </article>
+</div>
+
+<style>
+.blog-post img {
+    max-height: 400px;
+    object-fit: cover;
+}
+.blog-post-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+.blog-post-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+</style>
+{% endblock %} 

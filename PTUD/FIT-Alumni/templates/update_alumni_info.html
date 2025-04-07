@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Cập Nhật Thông Tin Cựu Sinh Viên - Alumni Network{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Cập Nhật Thông Tin Cựu Sinh Viên</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('update_alumni_info') }}">
+                        <div class="mb-3">
+                            <label for="graduation_year" class="form-label">Năm Tốt Nghiệp</label>
+                            <input type="number" class="form-control" id="graduation_year" name="graduation_year" 
+                                value="{{ current_user.alumni_info.graduation_year if current_user.alumni_info else '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="major" class="form-label">Chuyên Ngành</label>
+                            <input type="text" class="form-control" id="major" name="major" 
+                                value="{{ current_user.alumni_info.major if current_user.alumni_info else '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="current_position" class="form-label">Vị Trí Hiện Tại</label>
+                            <input type="text" class="form-control" id="current_position" name="current_position" 
+                                value="{{ current_user.alumni_info.current_position if current_user.alumni_info else '' }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="company" class="form-label">Công Ty</label>
+                            <input type="text" class="form-control" id="company" name="company" 
+                                value="{{ current_user.alumni_info.company if current_user.alumni_info else '' }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="achievements" class="form-label">Thành Tích</label>
+                            <textarea class="form-control" id="achievements" name="achievements" rows="4">{{ current_user.alumni_info.achievements if current_user.alumni_info else '' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="contributions" class="form-label">Đóng Góp Cho Trường</label>
+                            <textarea class="form-control" id="contributions" name="contributions" rows="4">{{ current_user.alumni_info.contributions if current_user.alumni_info else '' }}</textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Cập Nhật</button>
+                            <a href="{{ url_for('alumni_profile', alumni_id=current_user.alumni_info.id) if current_user.alumni_info else url_for('alumni') }}" class="btn btn-secondary">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
