@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Chỉnh sửa sự kiện{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm fade-in">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-edit me-2"></i>Chỉnh sửa sự kiện
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Basic Information -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-info-circle me-2 text-primary"></i>Thông tin cơ bản
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="form-floating">
+                                        {{ form.title(class="form-control", placeholder="Tên sự kiện") }}
+                                        {{ form.title.label(class="form-label") }}
+                                        {% if form.title.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.title.errors %}
+                                            {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    <div class="form-floating">
+                                        {{ form.description(class="form-control", style="height: 100px", placeholder="Mô tả sự kiện") }}
+                                        {{ form.description.label(class="form-label") }}
+                                        {% if form.description.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.description.errors %}
+                                            {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.start_time(class="form-control", type="datetime-local") }}
+                                        {{ form.start_time.label(class="form-label") }}
+                                        {% if form.start_time.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.start_time.errors %}
+                                            {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.end_time(class="form-control", type="datetime-local") }}
+                                        {{ form.end_time.label(class="form-label") }}
+                                        {% if form.end_time.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.end_time.errors %}
+                                            {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Location and Capacity -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-map-marker-alt me-2 text-primary"></i>Địa điểm và sức chứa
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <div class="form-floating">
+                                        {{ form.location(class="form-control", placeholder="Địa điểm") }}
+                                        {{ form.location.label(class="form-label") }}
+                                        {% if form.location.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.location.errors %}
+                                            {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        {{ form.capacity(class="form-control", type="number", min="1", placeholder="Sức chứa") }}
+                                        {{ form.capacity.label(class="form-label") }}
+                                        {% if form.capacity.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.capacity.errors %}
+                                            {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Event Image -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-image me-2 text-primary"></i>Ảnh sự kiện
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    {% if event.image %}
+                                    <div class="mb-3">
+                                        <label class="form-label">Ảnh hiện tại</label>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ url_for('static', filename='uploads/event_images/' + event.image) }}" 
+                                                 alt="{{ event.title }}" 
+                                                 class="rounded me-3" 
+                                                 style="width: 100px; height: 100px; object-fit: cover;">
+                                            <button type="button" 
+                                                    class="btn btn-outline-danger btn-sm" 
+                                                    onclick="removeImage()">
+                                                <i class="fas fa-trash me-2"></i>Xóa ảnh
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="form-group">
+                                        {{ form.image.label(class="form-label") }}
+                                        {{ form.image(class="form-control", accept="image/*") }}
+                                        <div class="form-text">Chỉ chấp nhận file ảnh (JPG, PNG). Kích thước tối đa: 5MB</div>
+                                        {% if form.image.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.image.errors %}
+                                            {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Information -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-list-alt me-2 text-primary"></i>Thông tin bổ sung
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="form-floating">
+                                        {{ form.requirements(class="form-control", style="height: 100px", placeholder="Yêu cầu") }}
+                                        {{ form.requirements.label(class="form-label") }}
+                                        {% if form.requirements.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.requirements.errors %}
+                                            {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-12">
+                                    <div class="form-floating">
+                                        {{ form.contact_info(class="form-control", style="height: 100px", placeholder="Thông tin liên hệ") }}
+                                        {{ form.contact_info.label(class="form-label") }}
+                                        {% if form.contact_info.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.contact_info.errors %}
+                                            {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('alumni_events') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                            <div>
+                                <button type="button" class="btn btn-outline-danger me-2" onclick="deleteEvent()">
+                                    <i class="fas fa-trash me-2"></i>Xóa sự kiện
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Lưu thay đổi
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa sự kiện</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa sự kiện này? Hành động này không thể hoàn tác.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form action="{{ url_for('alumni_delete_event', event_id=event.id) }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Xóa
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+
+// Preview image before upload
+document.getElementById('image').addEventListener('change', function(e) {
+    if (this.files && this.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            // You can add image preview here if needed
+        }
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+
+// Remove current image
+function removeImage() {
+    if (confirm('Bạn có chắc chắn muốn xóa ảnh hiện tại?')) {
+        fetch('{{ url_for("alumni_remove_event_image", event_id=event.id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra khi xóa ảnh');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xóa ảnh');
+        });
+    }
+}
+
+// Show delete confirmation modal
+function deleteEvent() {
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+</script>
+{% endblock %} 
