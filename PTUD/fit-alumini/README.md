@@ -11,7 +11,7 @@ Cổng thông tin dành cho cựu sinh viên FIT.
 
 1. Clone repository này về máy local:
 ```bash
-git clone <repository-url>
+git clone https://github.com/iuh-application-development/FIT-Alumni.git
 cd fit-alumini
 ```
 
