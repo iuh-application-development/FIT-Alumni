@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý việc làm{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-2">Quản lý việc làm</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item active" aria-current="page">Việc làm</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="btn-group">
+            <a href="{{ url_for('alumni_add_job') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Đăng tin tuyển dụng
+            </a>
+            <!-- Temporarily hide export/import buttons
+            <button type="button" class="btn btn-outline-primary" onclick="exportJobs()">
+                <i class="fas fa-file-export me-2"></i>Xuất Excel
+            </button>
+            <button type="button" class="btn btn-outline-success" onclick="importJobs()">
+                <i class="fas fa-file-import me-2"></i>Nhập Excel
+            </button>
+            -->
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm fade-in">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3"
+                             style="width: 48px; height: 48px;">
+                            <i class="fas fa-briefcase text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Tổng số việc làm</h6>
+                            <h4 class="mb-0">{{ jobs|length }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm fade-in">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-3"
+                             style="width: 48px; height: 48px;">
+                            <i class="fas fa-check text-success"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Đang tuyển</h6>
+                            <h4 class="mb-0">{{ jobs|selectattr('status', 'equalto', 'active')|list|length }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm fade-in">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center me-3"
+                             style="width: 48px; height: 48px;">
+                            <i class="fas fa-times text-secondary"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Đã đóng</h6>
+                            <h4 class="mb-0">{{ jobs|selectattr('status', 'equalto', 'closed')|list|length }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm fade-in">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center me-3"
+                             style="width: 48px; height: 48px;">
+                            <i class="fas fa-users text-info"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1">Tổng số ứng viên</h6>
+                            <h4 class="mb-0">{{ jobs|map(attribute='applications')|select('defined')|map('length')|sum }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4 fade-in">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control" 
+                               name="search" 
+                               placeholder="Tìm kiếm theo tiêu đề hoặc công ty..."
+                               value="{{ request.args.get('search', '') }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="status">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Đang tuyển</option>
+                        <option value="closed" {% if request.args.get('status') == 'closed' %}selected{% endif %}>Đã đóng</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="sort">
+                        <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Mới nhất</option>
+                        <option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>Cũ nhất</option>
+                        <option value="title" {% if request.args.get('sort') == 'title' %}selected{% endif %}>Tiêu đề A-Z</option>
+                        <option value="applications" {% if request.args.get('sort') == 'applications' %}selected{% endif %}>Nhiều ứng viên nhất</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-2"></i>Lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Jobs Table -->
+    <div class="card shadow-sm fade-in">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Vị trí</th>
+                            <th>Công ty</th>
+                            <th>Địa điểm</th>
+                            <th>Mức lương</th>
+                            <th>Điều kiện</th>
+                            <th>Ứng viên</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in jobs %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if job.company_logo %}
+                                    <img src="{{ url_for('static', filename='uploads/company_logos/' + job.company_logo) }}" 
+                                         alt="{{ job.company_name }}" 
+                                         class="rounded me-2"
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="rounded bg-light d-flex align-items-center justify-content-center me-2"
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-building text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold">{{ job.title }}</div>
+                                        <small class="text-muted">{{ job.company_name }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ job.company_name }}</td>
+                            <td>{{ job.location }}</td>
+                            <td>
+                                {% if job.salary_min and job.salary_max %}
+                                {{ job.salary_min|format_currency }} - {{ job.salary_max|format_currency }}
+                                {% else %}
+                                Thương lượng
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    {% if job.experience %}
+                                    <span class="badge bg-info mb-1">
+                                        <i class="fas fa-briefcase me-1"></i>
+                                        {% if job.experience == 'fresh' %}
+                                            Mới tốt nghiệp
+                                        {% elif job.experience == '1_year' %}
+                                            1 năm
+                                        {% elif job.experience == '2_years' %}
+                                            2 năm
+                                        {% elif job.experience == '3_5_years' %}
+                                            3-5 năm
+                                        {% elif job.experience == '5_plus_years' %}
+                                            Trên 5 năm
+                                        {% else %}
+                                            {{ job.experience }}
+                                        {% endif %}
+                                    </span>
+                                    {% endif %}
+                                    {% if job.job_type %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-clock me-1"></i>
+                                        {% if job.job_type == 'full_time' %}
+                                            Toàn thời gian
+                                        {% elif job.job_type == 'part_time' %}
+                                            Bán thời gian
+                                        {% elif job.job_type == 'contract' %}
+                                            Hợp đồng
+                                        {% elif job.job_type == 'internship' %}
+                                            Thực tập
+                                        {% elif job.job_type == 'remote' %}
+                                            Từ xa
+                                        {% else %}
+                                            {{ job.job_type }}
+                                        {% endif %}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ job.applications|length if job.applications else 0 }}</span>
+                            </td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           role="switch" 
+                                           id="status{{ job.id }}"
+                                           {% if job.status == 'active' %}checked{% endif %}
+                                           onchange="toggleStatus({{ job.id }})">
+                                    <label class="form-check-label" for="status{{ job.id }}">
+                                        {{ 'Đang tuyển' if job.status == 'active' else 'Đã đóng' }}
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <!-- Nút chỉnh sửa -->
+                                    <a href="{{ url_for('edit_job', job_id=job.id) }}" 
+                                       class="btn btn-info btn-sm d-flex align-items-center gap-2" 
+                                       title="Chỉnh sửa thông tin">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Sửa</span>
+                                    </a>
+
+                                    <!-- Nút xem ứng viên -->
+                                    <a href="{{ url_for('job_applications', job_id=job.id) }}"
+                                       class="btn btn-primary btn-sm d-flex align-items-center gap-2"
+                                       title="Xem danh sách ứng viên">
+                                        <i class="fas fa-users"></i>
+                                        {% if job.applications|length > 0 %}
+                                        <span class="badge bg-white text-primary">{{ job.applications|length }}</span>
+                                        {% else %}
+                                        <span>Ứng viên</span>
+                                        {% endif %}
+                                    </a>
+
+                                    <!-- Nút xem tin -->
+                                    <a href="{{ url_for('job_detail', job_id=job.id) }}" 
+                                       target="_blank"
+                                       class="btn btn-success btn-sm d-flex align-items-center gap-2"
+                                       title="Xem trang tin tuyển dụng">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Xem</span>
+                                    </a>
+
+                                    <!-- Nút xóa -->
+                                    <form action="{{ url_for('delete_job', job_id=job.id) }}" 
+                                          method="POST" 
+                                          class="d-inline" 
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa tin tuyển dụng này?');">
+                                        <button type="submit" 
+                                                class="btn btn-danger btn-sm d-flex align-items-center gap-2"
+                                                title="Xóa tin tuyển dụng">
+                                            <i class="fas fa-trash"></i>
+                                            <span>Xóa</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa tin tuyển dụng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa tin tuyển dụng này? Hành động này không thể hoàn tác.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteForm" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Xóa
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nhập danh sách việc làm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="importForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Chọn file Excel</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls">
+                        <div class="form-text">
+                            File Excel phải có các cột: Tiêu đề, Tên công ty, Địa điểm, Mức lương tối thiểu, Mức lương tối đa, Mô tả, Yêu cầu
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="submitImport()">Nhập</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Add event listeners for delete buttons
+    const deleteButtons = document.querySelectorAll('.delete-job-btn');
+    deleteButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            const jobId = this.getAttribute('data-job-id');
+            deleteJob(jobId);
+        });
+    });
+});
+
+// Toggle job status
+function toggleStatus(jobId) {
+    fetch("{{ url_for('toggle_publish_post', post_id=0) }}".replace('0', jobId), {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            alert(data.message || 'Có lỗi xảy ra khi cập nhật trạng thái');
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi cập nhật trạng thái');
+        location.reload();
+    });
+}
+
+// Show delete confirmation modal
+function deleteJob(jobId) {
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.action = "{{ url_for('delete_job', job_id=0) }}".replace('0', jobId);
+    deleteModal.show();
+}
+</script>
+{% endblock %} 

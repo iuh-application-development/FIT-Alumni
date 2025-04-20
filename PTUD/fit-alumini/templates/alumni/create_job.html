@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    {% include '_messages.html' %} 
+                    <form method="POST" action="{{ url_for('create_job') }}" enctype="multipart/form-data" novalidate>
+                        {{ form.hidden_tag() }} 
+
+                        <h5 class="mb-3 text-primary">Thông tin công việc</h5>
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label fw-bold") }}
+                            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), placeholder="VD: Lập trình viên Python") }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.title.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.location.label(class="form-label fw-bold") }}
+                                {{ form.location(class="form-select" + (" is-invalid" if form.location.errors else "")) }}
+                                {% if form.location.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.location.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.level.label(class="form-label fw-bold") }}
+                                {{ form.level(class="form-select" + (" is-invalid" if form.level.errors else "")) }}
+                                {% if form.level.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.level.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.job_type.label(class="form-label fw-bold") }}
+                                {{ form.job_type(class="form-select" + (" is-invalid" if form.job_type.errors else "")) }}
+                                {% if form.job_type.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.job_type.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                             <div class="col-md-6">
+                                {{ form.work_type.label(class="form-label fw-bold") }}
+                                {{ form.work_type(class="form-select" + (" is-invalid" if form.work_type.errors else "")) }}
+                                {% if form.work_type.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.work_type.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                         <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.experience.label(class="form-label fw-bold") }}
+                                {{ form.experience(class="form-control" + (" is-invalid" if form.experience.errors else ""), placeholder="VD: 1-2 năm") }}
+                                {% if form.experience.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.experience.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                             <div class="col-md-6">
+                                {{ form.headcount.label(class="form-label fw-bold") }}
+                                {{ form.headcount(class="form-control" + (" is-invalid" if form.headcount.errors else ""), placeholder="VD: 5") }}
+                                {% if form.headcount.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.headcount.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label fw-bold") }}
+                            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="5") }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.requirements.label(class="form-label fw-bold") }}
+                            {{ form.requirements(class="form-control" + (" is-invalid" if form.requirements.errors else ""), rows="5") }}
+                            {% if form.requirements.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.requirements.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                         <div class="mb-3">
+                            {{ form.skills.label(class="form-label fw-bold") }}
+                            {{ form.skills(class="form-control" + (" is-invalid" if form.skills.errors else ""), placeholder="VD: Python, Django, SQL") }}
+                            {% if form.skills.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.skills.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.benefits.label(class="form-label fw-bold") }}
+                            {{ form.benefits(class="form-control" + (" is-invalid" if form.benefits.errors else ""), rows="3") }}
+                            {% if form.benefits.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.benefits.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.salary_display.label(class="form-label fw-bold") }}
+                            {{ form.salary_display(class="form-control" + (" is-invalid" if form.salary_display.errors else ""), placeholder="VD: 15-20 triệu VNĐ hoặc Thỏa thuận") }}
+                            {% if form.salary_display.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.salary_display.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.deadline.label(class="form-label fw-bold") }}
+                                {{ form.deadline(class="form-control" + (" is-invalid" if form.deadline.errors else "")) }}
+                                {% if form.deadline.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.deadline.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.contact_email.label(class="form-label fw-bold") }}
+                                {{ form.contact_email(class="form-control" + (" is-invalid" if form.contact_email.errors else ""), placeholder="VD: tuyendung@congty.com") }}
+                                {% if form.contact_email.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.contact_email.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5 class="mb-3 text-primary">Thông tin công ty</h5>
+                        <div class="mb-3">
+                            {{ form.company_name.label(class="form-label fw-bold") }}
+                            {{ form.company_name(class="form-control" + (" is-invalid" if form.company_name.errors else ""), placeholder="Tên công ty của bạn") }}
+                            {% if form.company_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.company_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.company_description.label(class="form-label fw-bold") }}
+                            {{ form.company_description(class="form-control" + (" is-invalid" if form.company_description.errors else ""), rows="3") }}
+                            {% if form.company_description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.company_description.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.company_website.label(class="form-label fw-bold") }}
+                            {{ form.company_website(class="form-control" + (" is-invalid" if form.company_website.errors else ""), placeholder="VD: https://www.congty.com") }}
+                            {% if form.company_website.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.company_website.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.company_logo.label(class="form-label fw-bold") }}
+                            {{ form.company_logo(class="form-control" + (" is-invalid" if form.company_logo.errors else "")) }}
+                             <small class="form-text text-muted">Tải lên logo công ty (nếu có).</small>
+                            {% if form.company_logo.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.company_logo.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('alumni_jobs') }}" class="btn btn-outline-secondary me-md-2">Hủy</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Đăng tin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

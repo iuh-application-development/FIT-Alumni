@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết ứng viên - {{ application.applicant.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Application Header -->
+    <div class="card mb-4 fade-in">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center">
+                    {% if application.applicant.profile and application.applicant.profile.avatar %}
+                        <img src="{{ url_for('static', filename='uploads/' + application.applicant.profile.avatar) }}" 
+                             class="user-avatar-large" alt="Avatar">
+                    {% else %}
+                        <div class="user-avatar-placeholder-large">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-10">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h2 class="mb-2">{{ application.applicant.name }}</h2>
+                            <div class="d-flex flex-wrap gap-3 mb-2">
+                                <span class="text-muted">
+                                    <i class="fas fa-envelope me-1"></i>{{ application.applicant.email }}
+                                </span>
+                                <span class="text-muted">
+                                    <i class="fas fa-phone me-1"></i>{{ application.applicant.profile.phone if application.applicant.profile else 'Chưa cập nhật' }}
+                                </span>
+                                <span class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ application.applicant.profile.location if application.applicant.profile else 'Chưa cập nhật' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-{{ 'success' if application.status == 'accepted' else 'warning' if application.status == 'pending' else 'danger' }}">
+                                {{ 'Đã chấp nhận' if application.status == 'accepted' else 'Đang chờ' if application.status == 'pending' else 'Đã từ chối' }}
+                            </span>
+                            {% if not application.is_viewed %}
+                                <span class="badge bg-danger">Mới</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-primary">
+                            <i class="fas fa-calendar me-1"></i>Ngày nộp: {{ application.created_at.strftime('%d/%m/%Y %H:%M') }}
+                        </span>
+                        <span class="badge bg-info">
+                            <i class="fas fa-briefcase me-1"></i>{{ application.applicant.profile.position if application.applicant.profile else 'Chưa cập nhật' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Content -->
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-4">
+            <!-- Contact Info -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-address-card me-2"></i>Thông tin liên hệ
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            <a href="mailto:{{ application.applicant.email }}" class="text-decoration-none">
+                                {{ application.applicant.email }}
+                            </a>
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-phone me-2 text-primary"></i>
+                            {{ application.applicant.profile.phone if application.applicant.profile else 'Chưa cập nhật' }}
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                            {{ application.applicant.profile.location if application.applicant.profile else 'Chưa cập nhật' }}
+                        </li>
+                        <li>
+                            <i class="fas fa-link me-2 text-primary"></i>
+                            {% if application.applicant.profile and application.applicant.profile.linkedin %}
+                                <a href="{{ application.applicant.profile.linkedin }}" target="_blank" class="text-decoration-none">
+                                    LinkedIn
+                                </a>
+                            {% else %}
+                                Chưa cập nhật
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>Kỹ năng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if application.applicant.profile.skills %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in application.applicant.profile.skills %}
+                                <span class="badge bg-light text-dark">{{ skill.name }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">Chưa cập nhật</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-8">
+            <!-- Education -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-graduation-cap me-2"></i>Học vấn
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if application.applicant.profile.education %}
+                        {% for edu in application.applicant.profile.education %}
+                            <div class="mb-4">
+                                <h6 class="mb-1">{{ edu.school }}</h6>
+                                <p class="mb-1 text-muted">{{ edu.degree }} - {{ edu.major }}</p>
+                                <small class="text-muted">
+                                    {{ edu.start_year }} - {{ edu.end_year or 'Hiện tại' }}
+                                </small>
+                            </div>
+                            {% if not loop.last %}
+                                <hr class="my-3">
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted mb-0">Chưa cập nhật</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Experience -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-briefcase me-2"></i>Kinh nghiệm làm việc
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if application.applicant.profile.experience %}
+                        {% for exp in application.applicant.profile.experience %}
+                            <div class="mb-4">
+                                <h6 class="mb-1">{{ exp.position }} tại {{ exp.company }}</h6>
+                                <p class="mb-1 text-muted">{{ exp.description }}</p>
+                                <small class="text-muted">
+                                    {{ exp.start_date }} - {{ exp.end_date or 'Hiện tại' }}
+                                </small>
+                            </div>
+                            {% if not loop.last %}
+                                <hr class="my-3">
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted mb-0">Chưa cập nhật</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Cover Letter -->
+            <div class="card mb-4 fade-in">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>Thư xin việc
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if application.cover_letter %}
+                        <div class="cover-letter">
+                            {{ application.cover_letter|safe }}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">Không có thư xin việc</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-end gap-2 mb-4">
+        <a href="{{ url_for('alumni.job_applications', job_id=application.job_id) }}" 
+           class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        </a>
+        {% if application.status == 'pending' %}
+            <button type="button" class="btn btn-success"
+                    onclick="updateStatus({{ application.id }}, 'accepted')">
+                <i class="fas fa-check me-2"></i>Chấp nhận
+            </button>
+            <button type="button" class="btn btn-danger"
+                    onclick="updateStatus({{ application.id }}, 'rejected')">
+                <i class="fas fa-times me-2"></i>Từ chối
+            </button>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Update application status
+function updateStatus(applicationId, status) {
+    if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái?')) {
+        fetch(`/alumni/applications/${applicationId}/update_status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: status })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra khi cập nhật trạng thái');
+            }
+        });
+    }
+}
+</script>
+{% endblock %} 

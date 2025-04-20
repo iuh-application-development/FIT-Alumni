@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+
+{% block title %}Thống kê - FIT Alumni{% endblock %}
+
+{% block styles %}
+<style>
+.stat-card {
+    transition: transform 0.3s ease;
+    border: none;
+    border-radius: 15px;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    opacity: 0.2;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+.trend-indicator {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 300px;
+}
+
+.activity-table tr {
+    transition: background-color 0.2s ease;
+}
+
+.activity-table tr:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+.employer-rank {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.rank-1 { background-color: #FFD700; color: #000; }
+.rank-2 { background-color: #C0C0C0; color: #000; }
+.rank-3 { background-color: #CD7F32; color: #fff; }
+.rank-other { background-color: #e9ecef; color: #000; }
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    border: none;
+    border-radius: 15px;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #6c757d;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Thống kê chi tiết</h2>
+        <div class="text-muted">
+            <i class="fas fa-clock me-1"></i>
+            Cập nhật lần cuối: {{ now.strftime('%H:%M %d/%m/%Y') }}
+        </div>
+    </div>
+
+    <!-- Overview Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card bg-primary text-white">
+                <div class="card-body">
+                    <i class="fas fa-users stat-icon"></i>
+                    <h6 class="card-title">Tổng số người dùng</h6>
+                    <h2 class="card-text mb-2">{{ stats.total_users }}</h2>
+                    <div class="d-flex align-items-center">
+                        <small>Tháng trước: {{ stats.last_month_users }}</small>
+                        {% if stats.user_growth > 0 %}
+                            <span class="ms-2 trend-indicator bg-success bg-opacity-25">
+                                <i class="fas fa-arrow-up"></i> {{ stats.user_growth }}%
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-success text-white">
+                <div class="card-body">
+                    <i class="fas fa-briefcase stat-icon"></i>
+                    <h6 class="card-title">Tin tuyển dụng</h6>
+                    <h2 class="card-text mb-2">{{ stats.total_jobs }}</h2>
+                    <div class="d-flex align-items-center">
+                        <span class="trend-indicator bg-light text-success">
+                            {{ stats.active_jobs }} đang hoạt động
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-info text-white">
+                <div class="card-body">
+                    <i class="fas fa-paper-plane stat-icon"></i>
+                    <h6 class="card-title">Lượt ứng tuyển</h6>
+                    <h2 class="card-text mb-2">{{ stats.total_applications }}</h2>
+                    <div class="d-flex align-items-center">
+                        <span class="trend-indicator bg-light text-info">
+                            {{ stats.this_month_applications }} tháng này
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-warning text-dark">
+                <div class="card-body">
+                    <i class="fas fa-chart-line stat-icon"></i>
+                    <h6 class="card-title">Tỷ lệ thành công</h6>
+                    <h2 class="card-text mb-2">{{ stats.success_rate }}%</h2>
+                    <div class="d-flex align-items-center">
+                        <span class="trend-indicator bg-light text-warning">
+                            {{ stats.total_applications }} đơn
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Statistics -->
+    <div class="row mb-4">
+        <!-- User Distribution -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-friends me-2"></i>Phân bố người dùng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="userDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Categories -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tags me-2"></i>Phân loại công việc
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="jobCategoriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline Charts -->
+    <div class="row mb-4">
+        <!-- Monthly Activity -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Hoạt động theo tháng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="monthlyActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Tables -->
+    <div class="row">
+        <!-- Recent Activities -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Hoạt động gần đây
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover activity-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">Thời gian</th>
+                                    <th>Hoạt động</th>
+                                    <th class="pe-3">Chi tiết</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in recent_activities %}
+                                <tr>
+                                    <td class="ps-3">{{ activity.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>
+                                        {% if activity.action == 'Tin tuyển dụng mới' %}
+                                            <span class="badge bg-success">{{ activity.action }}</span>
+                                        {% else %}
+                                            <span class="badge bg-info">{{ activity.action }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="pe-3">{{ activity.details }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Employers -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-building me-2"></i>Nhà tuyển dụng hàng đầu
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">Công ty</th>
+                                    <th>Tin đăng</th>
+                                    <th class="pe-3">Lượt ứng tuyển</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employer in top_employers %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="employer-rank rank-{{ loop.index if loop.index <= 3 else 'other' }}">
+                                            {{ loop.index }}
+                                        </div>
+                                        {{ employer.company_name }}
+                                    </td>
+                                    <td>{{ employer.job_count }}</td>
+                                    <td class="pe-3">{{ employer.application_count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+Chart.defaults.font.family = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+Chart.defaults.font.size = 13;
+
+// User Distribution Chart
+const userDistributionCtx = document.getElementById('userDistributionChart').getContext('2d');
+new Chart(userDistributionCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Sinh viên', 'Cựu sinh viên', 'Quản trị viên'],
+        datasets: [{
+            data: [{{ stats.student_count }}, {{ stats.alumni_count }}, {{ stats.admin_count }}],
+            backgroundColor: ['#36A2EB', '#4BC0C0', '#FF6384'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        cutout: '60%'
+    }
+});
+
+// Job Categories Chart
+const jobCategoriesCtx = document.getElementById('jobCategoriesChart').getContext('2d');
+new Chart(jobCategoriesCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ job_categories|tojson }},
+        datasets: [{
+            label: 'Số lượng tin',
+            data: {{ job_category_counts|tojson }},
+            backgroundColor: '#4BC0C0',
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    drawBorder: false
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+
+// Monthly Activity Chart
+const monthlyActivityCtx = document.getElementById('monthlyActivityChart').getContext('2d');
+new Chart(monthlyActivityCtx, {
+    type: 'line',
+    data: {
+        labels: {{ monthly_labels|tojson }},
+        datasets: [{
+            label: 'Tin tuyển dụng mới',
+            data: {{ monthly_jobs|tojson }},
+            borderColor: '#4BC0C0',
+            backgroundColor: '#4BC0C0',
+            tension: 0.4,
+            fill: false
+        }, {
+            label: 'Đơn ứng tuyển',
+            data: {{ monthly_applications|tojson }},
+            borderColor: '#36A2EB',
+            backgroundColor: '#36A2EB',
+            tension: 0.4,
+            fill: false
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        },
+        plugins: {
+            legend: {
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    drawBorder: false
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %} 

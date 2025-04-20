@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - FIT Alumni{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Statistics Cards -->
+        <div class="col-md-3 mb-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng số việc làm</h5>
+                    <h2 class="card-text">{{ total_jobs }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng số công ty</h5>
+                    <h2 class="card-text">{{ total_companies }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tổng số cựu sinh viên</h5>
+                    <h2 class="card-text">{{ total_alumni }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tỷ lệ thành công</h5>
+                    <h2 class="card-text">{{ success_rate }}%</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Completion -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Hoàn thiện hồ sơ</h5>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{ profile_completion }}%">
+                            {{ profile_completion }}%
+                        </div>
+                    </div>
+                    <a href="{{ url_for('edit_profile') }}" class="btn btn-primary mt-2">Cập nhật hồ sơ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Applications -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Đơn ứng tuyển gần đây</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_applications %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Vị trí</th>
+                                        <th>Công ty</th>
+                                        <th>Ngày ứng tuyển</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in recent_applications %}
+                                        <tr>
+                                            <td>{{ app.job.title }}</td>
+                                            <td>{{ app.job.company_name }}</td>
+                                            <td>{{ app.created_at.strftime('%d/%m/%Y') }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if app.status == 'accepted' else 'warning' if app.status == 'pending' else 'danger' }}">
+                                                    {{ app.status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Bạn chưa có đơn ứng tuyển nào.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Jobs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Việc làm nổi bật</h5>
+                </div>
+                <div class="card-body">
+                    {% if featured_jobs %}
+                        <div class="row">
+                            {% for job in featured_jobs %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ job.title }}</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">{{ job.company_name }}</h6>
+                                            <p class="card-text">{{ job.description[:150] }}...</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-primary">{{ job.job_type }}</span>
+                                                <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Hiện chưa có việc làm nổi bật.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

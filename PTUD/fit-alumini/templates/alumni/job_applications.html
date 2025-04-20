@@ -1,0 +1,593 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý hồ sơ ứng tuyển - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Job Info Header -->
+    <div class="card mb-4 fade-in">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center">
+                    {% if job.company_logo %}
+                        <img src="{{ url_for('static', filename='uploads/company_logos/' + job.company_logo) }}" 
+                             class="company-logo" alt="Company Logo">
+                    {% else %}
+                        <div class="company-logo-placeholder">
+                            <i class="fas fa-building"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-10">
+                    <h2 class="mb-2">{{ job.title }}</h2>
+                    <div class="d-flex flex-wrap gap-3 mb-2">
+                        <span class="text-muted">
+                            <i class="fas fa-building me-1"></i>{{ job.company }}
+                        </span>
+                        <span class="text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ job.location }}
+                        </span>
+                        <span class="text-muted">
+                            <i class="fas fa-briefcase me-1"></i>
+                            {{ 'Toàn thời gian' if job.type == 'fulltime' else 'Bán thời gian' if job.type == 'parttime' else 'Thực tập' }}
+                        </span>
+                        <span class="text-muted">
+                            <i class="fas fa-clock me-1"></i>Hạn nộp: {{ job.deadline.strftime('%d/%m/%Y') }}
+                        </span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-{{ 'success' if job.is_active else 'secondary' }}">
+                            {{ 'Đang tuyển' if job.is_active else 'Đã đóng' }}
+                        </span>
+                        <span class="badge bg-primary">
+                            {{ applications|length }} ứng viên
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card fade-in">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-0">Tổng số ứng viên</h6>
+                            <h3 class="mb-0">{{ applications|length }}</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card fade-in">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-0">Đã xem</h6>
+                            <h3 class="mb-0">{{ applications|selectattr('is_viewed')|list|length }}</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card fade-in">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-0">Đã chấp nhận</h6>
+                            <h3 class="mb-0">{{ applications|selectattr('status', 'equalto', 'accepted')|list|length }}</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card fade-in">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-0">Đang chờ</h6>
+                            <h3 class="mb-0">{{ applications|selectattr('status', 'equalto', 'pending')|list|length }}</h3>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4 fade-in">
+        <div class="card-body">
+            <form id="filterForm" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" name="search" placeholder="Tìm kiếm ứng viên..." value="{{ request.args.get('search', '') }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="status">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Đang chờ</option>
+                        <option value="accepted" {% if request.args.get('status') == 'accepted' %}selected{% endif %}>Đã chấp nhận</option>
+                        <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>Đã từ chối</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="viewed">
+                        <option value="">Tất cả</option>
+                        <option value="viewed" {% if request.args.get('viewed') == 'viewed' %}selected{% endif %}>Đã xem</option>
+                        <option value="unviewed" {% if request.args.get('viewed') == 'unviewed' %}selected{% endif %}>Chưa xem</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="sort">
+                        <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Mới nhất</option>
+                        <option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>Cũ nhất</option>
+                        <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Tên A-Z</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="card fade-in">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ứng viên</th>
+                            <th>Email</th>
+                            <th>Số điện thoại</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày nộp</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in applications %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if application.applicant.profile and application.applicant.profile.avatar %}
+                                        <img src="{{ url_for('static', filename='uploads/avatars/' + application.applicant.profile.avatar) }}" 
+                                             class="user-avatar me-2" alt="Avatar">
+                                    {% else %}
+                                        <div class="user-avatar-placeholder me-2">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-0">{{ application.applicant.name }}</h6>
+                                        <small class="text-muted">{{ application.applicant.profile.position if application.applicant.profile else 'Chưa cập nhật' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ application.applicant.email }}</td>
+                            <td>{{ application.applicant.profile.phone if application.applicant.profile else 'Chưa cập nhật' }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if application.status == 'accepted' else 'warning' if application.status == 'pending' else 'danger' }}">
+                                    {{ 'Đã chấp nhận' if application.status == 'accepted' else 'Đang chờ' if application.status == 'pending' else 'Đã từ chối' }}
+                                </span>
+                                {% if not application.is_viewed %}
+                                    <span class="badge bg-danger ms-1">Mới</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ application.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                            onclick="showApplicationDetails({{ application.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-success dropdown-toggle"
+                                                data-bs-toggle="dropdown">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="#" 
+                                                   onclick="updateStatus({{ application.id }}, 'accepted')">
+                                                    Chấp nhận
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#" 
+                                                   onclick="updateStatus({{ application.id }}, 'rejected')">
+                                                    Từ chối
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Application Details Modal -->
+<div class="modal fade" id="applicationModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-circle text-primary me-2"></i>
+                    <span id="modalTitle">Thông tin ứng viên</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="modalContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Đóng
+                </button>
+                <div id="modalActions">
+                    <!-- Action buttons will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Preload */
+.preload * {
+    transition: none !important;
+}
+
+/* Modal Optimizations */
+.modal {
+    will-change: transform;
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+.modal-dialog {
+    margin: 0.5rem auto;
+    max-width: 95%;
+    width: 800px;
+}
+
+@media (min-width: 992px) {
+    .modal-dialog {
+        max-width: 800px;
+    }
+}
+
+.modal.fade .modal-dialog {
+    transform: scale(0.98);
+    opacity: 0;
+    transition: all 0.2s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-content {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.modal-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    max-height: calc(100vh - 200px);
+}
+
+/* Smooth Scrolling */
+.modal-dialog-scrollable .modal-content {
+    overflow: hidden;
+    max-height: calc(100vh - 2rem);
+}
+
+/* Card Optimizations */
+.card {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.card:hover {
+    transform: translateY(-2px) translateZ(0);
+}
+
+/* Animation Optimizations */
+.fade-in {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0;
+        transform: translateY(10px) translateZ(0);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) translateZ(0);
+    }
+}
+
+/* User Avatar */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+}
+
+/* Stat Cards */
+.stat-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 10px;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+}
+
+/* Filter Form */
+#filterForm .form-control,
+#filterForm .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+
+#filterForm .form-control:focus,
+#filterForm .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+#filterForm .input-group-text {
+    border-radius: 8px 0 0 8px;
+    border: 1px solid #dee2e6;
+    border-right: none;
+    background-color: #fff;
+}
+
+/* Button Group */
+.btn-group .btn {
+    transition: all 0.2s ease;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Badge */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+}
+
+/* Card Styles */
+.card-title {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+/* Skeleton Loading */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+.skeleton-text {
+    height: 1em;
+    width: 100%;
+    margin-bottom: 0.5em;
+    border-radius: 0.25em;
+}
+
+.skeleton-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.skeleton-badge {
+    height: 1.5em;
+    width: 5em;
+    border-radius: 1em;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+</style>
+
+{% block scripts %}
+<script>
+// Show application details with skeleton loading
+function showApplicationDetails(applicationId) {
+    const modal = new bootstrap.Modal(document.getElementById('applicationModal'));
+    const modalContent = document.getElementById('modalContent');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalActions = document.getElementById('modalActions');
+    
+    // Show skeleton loading
+    modalContent.innerHTML = `
+        <div class="d-flex align-items-center mb-4">
+            <div class="skeleton skeleton-avatar me-3"></div>
+            <div style="flex: 1;">
+                <div class="skeleton skeleton-text" style="width: 60%;"></div>
+                <div class="skeleton skeleton-text" style="width: 40%;"></div>
+                <div class="d-flex gap-3 mt-2">
+                    <div class="skeleton skeleton-badge"></div>
+                    <div class="skeleton skeleton-badge"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="skeleton skeleton-text" style="width: 30%;"></div>
+                <div class="mt-3">
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text" style="width: 80%;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="skeleton skeleton-text" style="width: 30%;"></div>
+                <div class="mt-3">
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text" style="width: 60%;"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Show modal first
+    modal.show();
+    
+    // Fetch application details
+    fetch(`/alumni/applications/${applicationId}/details`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update modal content
+                modalTitle.textContent = `Thông tin ứng viên - ${data.application.applicant.name}`;
+                modalContent.innerHTML = data.html;
+                
+                // Update action buttons
+                if (data.application.status === 'pending') {
+                    modalActions.innerHTML = `
+                        <button type="button" class="btn btn-success"
+                                onclick="updateStatus(${applicationId}, 'accepted')">
+                            <i class="fas fa-check me-2"></i>Chấp nhận
+                        </button>
+                        <button type="button" class="btn btn-danger"
+                                onclick="updateStatus(${applicationId}, 'rejected')">
+                            <i class="fas fa-times me-2"></i>Từ chối
+                        </button>
+                    `;
+                } else {
+                    modalActions.innerHTML = '';
+                }
+            } else {
+                modalContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Có lỗi xảy ra khi tải thông tin ứng viên
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            modalContent.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Có lỗi xảy ra khi tải thông tin ứng viên
+                </div>
+            `;
+        });
+}
+
+// Update application status
+function updateStatus(applicationId, status) {
+    if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái?')) {
+        fetch(`/alumni/applications/${applicationId}/update_status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: status })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra khi cập nhật trạng thái');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi cập nhật trạng thái');
+        });
+    }
+}
+
+// Auto submit form when filters change
+document.querySelectorAll('#filterForm select').forEach(select => {
+    select.addEventListener('change', () => {
+        document.getElementById('filterForm').submit();
+    });
+});
+</script>
+{% endblock %}
+
+<!-- Add preload class to body -->
+{% block body_tag %}<body class="preload">{% endblock %}
+
+{% endblock content %} 
