@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý chặn người dùng - FIT Alumni{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-2">Quản lý chặn người dùng</h1>
+            <p class="text-muted">Quản lý trạng thái chặn/mở chặn của người dùng trong hệ thống</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>Vai trò</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'primary' if user.role == 'admin' else 'secondary' }}">
+                                    {{ 'Admin' if user.role == 'admin' else 'Người dùng' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'danger' if user.is_banned else 'success' }}">
+                                    {{ 'Đã chặn' if user.is_banned else 'Đang hoạt động' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if user.role != 'admin' %}
+                                <form action="{{ url_for('toggle_user_ban', user_id=user.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-{{ 'success' if user.is_banned else 'danger' }}">
+                                        {% if user.is_banned %}
+                                        <i class="fas fa-unlock me-1"></i>Mở chặn
+                                        {% else %}
+                                        <i class="fas fa-ban me-1"></i>Chặn
+                                        {% endif %}
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %} 

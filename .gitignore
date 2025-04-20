@@ -1,0 +1,11 @@
+# Ignore các file ngoài dự án bị Git nhận nhầm
+../../*.exe
+../../*.dat
+../../*.ini
+../../*.LOG*
+../../pyspark-zero-to-hero/
+../../flask-tiny-app/
+../../flask/
+../../scikit_learn_data/
+"../../ĐTĐM/"
+/PTUD/

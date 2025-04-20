@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Bảng tin - FIT Alumni{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Create Post Form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form action="{{ url_for('create_post') }}" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <textarea class="form-control" name="content" rows="3" placeholder="Chia sẻ điều gì đó..."></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <input type="file" name="image" class="form-control" accept="image/*">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Đăng bài</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Posts List -->
+            {% for post in posts %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        {% if post.author.profile and post.author.profile.avatar %}
+                        <img src="{{ url_for('uploaded_file', filename=post.author.profile.avatar) }}" class="rounded-circle me-2" width="40" height="40">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" class="rounded-circle me-2" width="40" height="40">
+                        {% endif %}
+                        <div>
+                            <h5 class="card-title mb-0">{{ post.author.name }}</h5>
+                            <small class="text-muted">{{ post.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                        </div>
+                    </div>
+                    
+                    <p class="card-text">{{ post.content }}</p>
+                    
+                    {% if post.image %}
+                    <img src="{{ url_for('uploaded_file', filename=post.image) }}" class="img-fluid mb-3">
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-primary like-btn" data-post-id="{{ post.id }}">
+                                <i class="fas fa-heart"></i> 
+                                <span class="likes-count">{{ post.likers.count() }}</span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary comment-btn" data-post-id="{{ post.id }}">
+                                <i class="fas fa-comment"></i> 
+                                Bình luận
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="comments-section mt-3" id="comments-{{ post.id }}">
+                        {% for comment in post.comments %}
+                        <div class="d-flex mb-2">
+                            {% if comment.author.profile and comment.author.profile.avatar %}
+                            <img src="{{ url_for('uploaded_file', filename=comment.author.profile.avatar) }}" class="rounded-circle me-2" width="32" height="32">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" class="rounded-circle me-2" width="32" height="32">
+                            {% endif %}
+                            <div class="comment-content">
+                                <h6 class="mb-0">{{ comment.author.name }}</h6>
+                                <p class="mb-0">{{ comment.content }}</p>
+                                <small class="text-muted">{{ comment.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- Comment Form -->
+                        <form class="comment-form mt-3" data-post-id="{{ post.id }}">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Viết bình luận...">
+                                <button class="btn btn-primary" type="submit">Gửi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Thống kê</h5>
+                    <ul class="list-unstyled">
+                        <li>Tổng số bài viết: {{ posts|length }}</li>
+                        <li>Số người dùng online: {{ users_online if users_online else 0 }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Like functionality
+    $('.like-btn').click(function() {
+        var postId = $(this).data('post-id');
+        var btn = $(this);
+        
+        $.post('/social/posts/' + postId + '/toggle_like', function(data) {
+            if (data.success) {
+                btn.find('.likes-count').text(data.likes_count);
+            }
+        });
+    });
+
+    // Comment functionality
+    $('.comment-form').submit(function(e) {
+        e.preventDefault();
+        var postId = $(this).data('post-id');
+        var content = $(this).find('input').val();
+        
+        $.ajax({
+            url: '/social/posts/' + postId + '/comments',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ content: content }),
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 
