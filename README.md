@@ -53,6 +53,4 @@ http://localhost:5000
 - `migrations/`: Thư mục chứa các file migration của database
 - `alumni.db`: Database SQLite chứa dữ liệu ứng dụng
 
-## Đóng góp
 
-Nếu bạn muốn đóng góp cho dự án, vui lòng tạo pull request hoặc báo cáo issues. 
