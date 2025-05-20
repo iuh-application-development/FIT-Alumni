@@ -1,95 +1,58 @@
-# Alumni Network
+# FIT Alumni Portal
 
-A web application for connecting alumni students, built with Flask.
+Cổng thông tin dành cho cựu sinh viên FIT.
 
-## Features
+## Yêu cầu hệ thống
 
-- User authentication (login/register)
-- Profile management
-- Post creation and sharing
-- Connection with other alumni
-- Job opportunities
-- Event management
-- Private messaging
-- Admin dashboard
-
-## Prerequisites
-
-- Python 3.8 or higher
+- Python 3.8 hoặc cao hơn
 - pip (Python package installer)
 
-## Installation
+## Cài đặt
 
-1. Clone the repository:
+1. Clone repository này về máy local:
 ```bash
-git clone <repository-url>
-cd alumni-network
+git clone https://github.com/iuh-application-development/FIT-Alumni.git
+cd fit-alumini
 ```
 
-2. Create a virtual environment (recommended):
+2. Tạo và kích hoạt môi trường ảo (virtual environment):
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Windows
+.\venv\Scripts\activate
+# Linux/Mac
+source venv/bin/activate
 ```
 
-3. Install dependencies:
+3. Cài đặt các thư viện cần thiết:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Set up environment variables:
-Create a `.env` file in the root directory with the following content:
-```
-FLASK_APP=app.py
-FLASK_ENV=development
-SECRET_KEY=your-secret-key-here
-```
+## Chạy ứng dụng
 
-5. Initialize the database:
+1. Đảm bảo bạn đang ở trong môi trường ảo (venv)
+
+2. Chạy ứng dụng:
 ```bash
-flask db init
-flask db migrate
-flask db upgrade
+python app.py
 ```
 
-## Running the Application
-
-1. Start the Flask development server:
-```bash
-flask run
-```
-
-2. Open your web browser and navigate to:
+3. Mở trình duyệt web và truy cập:
 ```
 http://localhost:5000
 ```
 
-## Project Structure
+## Cấu trúc thư mục
 
-```
-alumni-network/
-├── app.py              # Main application file
-├── requirements.txt    # Python dependencies
-├── static/            # Static files (CSS, JS, images)
-│   ├── css/
-│   └── js/
-├── templates/         # HTML templates
-│   ├── base.html
-│   ├── index.html
-│   ├── login.html
-│   └── ...
-└── instance/         # Instance-specific files
-    └── alumni.db     # SQLite database
-```
+- `app.py`: File chính chứa mã nguồn ứng dụng Flask
+- `forms.py`: Chứa các form được sử dụng trong ứng dụng
+- `requirements.txt`: Danh sách các thư viện Python cần thiết
+- `static/`: Thư mục chứa các file tĩnh (CSS, JavaScript, hình ảnh)
+- `templates/`: Thư mục chứa các template HTML
+- `migrations/`: Thư mục chứa các file migration của database
+- `alumni.db`: Database SQLite chứa dữ liệu ứng dụng
 
-## Contributing
+## Đóng góp
 
-1. Fork the repository
-2. Create a new branch for your feature
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details. 
+Nếu bạn muốn đóng góp cho dự án, vui lòng tạo pull request hoặc báo cáo issues. 
