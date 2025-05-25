@@ -26,6 +26,7 @@ class User(UserMixin, db.Model):
     experience = db.relationship('Experience', backref='user', lazy=True)
     skills = db.relationship('Skill', backref='user', lazy=True)
     jobs_posted = db.relationship('Job', backref='alumni', lazy=True, foreign_keys='Job.alumni_id')
+    events_created = db.relationship('Event', backref='creator', lazy=True, foreign_keys='Event.creator_id')
 
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -113,4 +114,28 @@ class JobApplication(db.Model):
     job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    user = db.relationship('User', backref=db.backref('job_applications', lazy=True)) 
+    user = db.relationship('User', backref=db.backref('job_applications', lazy=True))
+
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    start_time = db.Column(db.DateTime(timezone=True), nullable=False)
+    end_time = db.Column(db.DateTime(timezone=True))
+    location = db.Column(db.String(200), nullable=False)
+    capacity = db.Column(db.Integer)
+    requirements = db.Column(db.Text)
+    contact_info = db.Column(db.Text)
+    image = db.Column(db.String(200))
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    is_published = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    registrations = db.relationship('EventRegistration', backref='event', lazy=True, cascade='all, delete-orphan')
+
+class EventRegistration(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    status = db.Column(db.String(20), default='registered')  # registered, canceled, attended
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship('User', backref=db.backref('event_registrations', lazy=True)) 

@@ -8,7 +8,7 @@ import logging
 from werkzeug.utils import secure_filename
 from urllib.parse import urlencode
 from sqlalchemy import or_, and_, func
-from forms import RegistrationForm, LoginForm, JobForm
+from forms import RegistrationForm, LoginForm, JobForm, EventForm
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
@@ -19,7 +19,7 @@ import csv
 import time
 from models import (
     db, User, Profile, Post, Comment, Job, JobApplication, post_likes,
-    Education, Experience, Skill
+    Education, Experience, Skill, Event, EventRegistration
 )
 
 # Configure logging
@@ -43,11 +43,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
+# Flask-Login configuration
+app.config['LOGIN_MESSAGE_CATEGORY'] = 'info'
+app.config['REFRESH_MESSAGE_CATEGORY'] = 'info'
+
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'resumes'), exist_ok=True)
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'posts'), exist_ok=True)
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'avatars'), exist_ok=True)
+os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'company_logos'), exist_ok=True)
+os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'events'), exist_ok=True)
 
 # Ensure database directory exists
 os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
@@ -92,9 +98,7 @@ def allowed_file(filename, allowed_extensions=None):
 # Routes
 @app.route('/')
 def index():
-    # Lấy 6 công việc mới nhất
-    latest_jobs = Job.query.order_by(Job.created_at.desc()).limit(6).all()
-    return render_template('index.html', latest_jobs=latest_jobs)
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -188,13 +192,56 @@ def edit_profile():
 
     if request.method == 'POST':
         try:
+            # Update basic user info (name and email)
+            current_user.name = request.form.get('name')
+            email = request.form.get('email')
+            
+            # Check if email has changed and is not already used
+            if email != current_user.email:
+                existing_user = User.query.filter_by(email=email).first()
+                if existing_user and existing_user.id != current_user.id:
+                    flash('Email đã được sử dụng bởi tài khoản khác!', 'danger')
+                    return redirect(url_for('edit_profile'))
+                current_user.email = email
+            
             # Update profile
             profile.bio = request.form.get('bio')
             profile.phone = request.form.get('phone')
             profile.address = request.form.get('address')
             profile.company = request.form.get('company')
             profile.position = request.form.get('position')
-            profile.graduation_year = request.form.get('graduation_year')
+            
+            # Graduation year
+            graduation_year = request.form.get('graduation_year')
+            if graduation_year:
+                try:
+                    profile.graduation_year = int(graduation_year)
+                except ValueError:
+                    # Invalid year input, ignore
+                    pass
+
+            # Handle avatar upload
+            if 'avatar' in request.files and request.files['avatar'].filename:
+                avatar_file = request.files['avatar']
+                if allowed_file(avatar_file.filename, {'png', 'jpg', 'jpeg', 'gif'}):
+                    # Remove old avatar if exists
+                    if profile.avatar:
+                        old_avatar_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', profile.avatar)
+                        try:
+                            if os.path.exists(old_avatar_path):
+                                os.remove(old_avatar_path)
+                        except Exception as e:
+                            app.logger.warning(f"Failed to remove old avatar: {str(e)}")
+                    
+                    # Save new avatar
+                    filename = secure_filename(f"{current_user.id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{avatar_file.filename}")
+                    avatar_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', filename)
+                    os.makedirs(os.path.dirname(avatar_path), exist_ok=True)
+                    avatar_file.save(avatar_path)
+                    profile.avatar = filename
+                else:
+                    flash('Định dạng file ảnh không hợp lệ. Chỉ chấp nhận PNG, JPG, JPEG, GIF.', 'danger')
+                    return redirect(url_for('edit_profile'))
 
             if not current_user.profile:
                 db.session.add(profile)
@@ -211,14 +258,29 @@ def edit_profile():
             # Create new education entries
             for i in range(len(schools)):
                 if schools[i].strip():  # Only add if school is not empty
-                    education_entry = Education(
-                        user_id=current_user.id,
-                        school=schools[i],
-                        major=majors[i] if i < len(majors) else '',
-                        start_date=edu_start_dates[i] if i < len(edu_start_dates) else None,
-                        end_date=edu_end_dates[i] if i < len(edu_end_dates) else None
-                    )
-                    db.session.add(education_entry)
+                    try:
+                        # Convert date strings to datetime objects
+                        start_date = None
+                        end_date = None
+                        
+                        if i < len(edu_start_dates) and edu_start_dates[i].strip():
+                            start_date = datetime.strptime(edu_start_dates[i], '%Y-%m-%d')
+                        
+                        if i < len(edu_end_dates) and edu_end_dates[i].strip():
+                            end_date = datetime.strptime(edu_end_dates[i], '%Y-%m-%d')
+                        
+                        education_entry = Education(
+                            user_id=current_user.id,
+                            school=schools[i].strip(),
+                            major=majors[i].strip() if i < len(majors) else '',
+                            start_date=start_date,
+                            end_date=end_date
+                        )
+                        db.session.add(education_entry)
+                    except ValueError as e:
+                        # Log error and continue with next entry
+                        app.logger.error(f"Error parsing date for education entry {i}: {str(e)}")
+                        flash(f'Định dạng ngày không hợp lệ cho mục học vấn #{i+1}', 'warning')
 
             # Handle experience entries
             positions = request.form.getlist('position[]')
@@ -233,27 +295,59 @@ def edit_profile():
             # Create new experience entries
             for i in range(len(positions)):
                 if positions[i].strip():  # Only add if position is not empty
-                    experience_entry = Experience(
-                        user_id=current_user.id,
-                        position=positions[i],
-                        company=companies[i] if i < len(companies) else '',
-                        start_date=exp_start_dates[i] if i < len(exp_start_dates) else None,
-                        end_date=exp_end_dates[i] if i < len(exp_end_dates) else None,
-                        description=descriptions[i] if i < len(descriptions) else ''
-                    )
-                    db.session.add(experience_entry)
+                    try:
+                        # Convert date strings to datetime objects
+                        start_date = None
+                        end_date = None
+                        
+                        if i < len(exp_start_dates) and exp_start_dates[i].strip():
+                            start_date = datetime.strptime(exp_start_dates[i], '%Y-%m-%d')
+                        
+                        if i < len(exp_end_dates) and exp_end_dates[i].strip():
+                            end_date = datetime.strptime(exp_end_dates[i], '%Y-%m-%d')
+                        
+                        experience_entry = Experience(
+                            user_id=current_user.id,
+                            position=positions[i].strip(),
+                            company=companies[i].strip() if i < len(companies) else '',
+                            start_date=start_date,
+                            end_date=end_date,
+                            description=descriptions[i].strip() if i < len(descriptions) else ''
+                        )
+                        db.session.add(experience_entry)
+                    except ValueError as e:
+                        # Log error and continue with next entry
+                        app.logger.error(f"Error parsing date for experience entry {i}: {str(e)}")
+                        flash(f'Định dạng ngày không hợp lệ cho mục kinh nghiệm #{i+1}', 'warning')
 
             # Handle skills
-            skills_input = request.form.get('skills', '').split(',')
-            skills_list = [skill.strip() for skill in skills_input if skill.strip()]
+            skills_input = request.form.get('skills', '')
+            # Log the input for debugging
+            app.logger.info(f"Skills input: {skills_input}")
             
-            # Delete all existing skills
-            Skill.query.filter_by(user_id=current_user.id).delete()
+            # Chuẩn hóa chuỗi kỹ năng
+            if skills_input:
+                # Xử lý kỹ năng - tách bằng dấu phẩy và loại bỏ khoảng trắng thừa
+                skills_list = [skill.strip() for skill in skills_input.split(',') if skill.strip()]
+                app.logger.info(f"Parsed skills: {skills_list}")
+            else:
+                skills_list = []
+                app.logger.info("No skills provided")
             
-            # Add new skills
-            for skill_name in skills_list:
-                skill = Skill(user_id=current_user.id, name=skill_name)
-                db.session.add(skill)
+            try:
+                # Delete all existing skills
+                Skill.query.filter_by(user_id=current_user.id).delete()
+                
+                # Add new skills
+                for skill_name in skills_list:
+                    skill = Skill(user_id=current_user.id, name=skill_name)
+                    db.session.add(skill)
+                
+                app.logger.info(f"Added {len(skills_list)} skills")
+            except Exception as e:
+                app.logger.error(f"Error processing skills: {str(e)}")
+                flash(f'Có lỗi xảy ra khi cập nhật kỹ năng: {str(e)}', 'warning')
+                # Continue with other updates even if skills failed
 
             db.session.commit()
             flash('Cập nhật thông tin thành công!', 'success')
@@ -262,7 +356,7 @@ def edit_profile():
         except Exception as e:
             db.session.rollback()
             app.logger.error(f'Error in edit_profile: {str(e)}', exc_info=True)
-            flash('Có lỗi xảy ra khi cập nhật thông tin!', 'error')
+            flash(f'Có lỗi xảy ra khi cập nhật thông tin: {str(e)}', 'danger')
             return redirect(url_for('edit_profile'))
 
     # GET request: populate form with existing data
@@ -270,7 +364,8 @@ def edit_profile():
                          profile=profile,
                          education=education,
                          experience=experience,
-                         skills=skills)
+                         skills=skills,
+                         current_year=datetime.now().year)
 
 @app.route('/update_avatar', methods=['POST'])
 @login_required
@@ -284,26 +379,57 @@ def update_avatar():
         flash('Không có file được chọn', 'danger')
         return redirect(url_for('profile'))
     
-    if file and allowed_file(file.filename):
+    if file and allowed_file(file.filename, {'png', 'jpg', 'jpeg', 'gif'}):
+        # Tạo tên tệp duy nhất
         filename = secure_filename(f"{current_user.id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}")
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         
-        # Remove old avatar if exists
-        if current_user.profile and current_user.profile.avatar:
-            old_avatar = os.path.join(app.config['UPLOAD_FOLDER'], current_user.profile.avatar)
-            if os.path.exists(old_avatar):
-                os.remove(old_avatar)
+        # Đường dẫn đầy đủ đến thư mục lưu trữ
+        avatar_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', filename)
         
-        # Update profile
-        profile = current_user.profile or Profile(user_id=current_user.id)
-        profile.avatar = filename
+        # Đảm bảo thư mục tồn tại
+        os.makedirs(os.path.dirname(avatar_path), exist_ok=True)
         
-        if not current_user.profile:
-            db.session.add(profile)
-        
-        db.session.commit()
-        flash('Cập nhật ảnh đại diện thành công', 'success')
+        try:
+            # Lưu tệp
+            file.save(avatar_path)
+            
+            # Xóa avatar cũ nếu có
+            if current_user.profile and current_user.profile.avatar:
+                old_avatar_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', current_user.profile.avatar)
+                if os.path.exists(old_avatar_path):
+                    os.remove(old_avatar_path)
+                    app.logger.info(f"Đã xóa avatar cũ: {old_avatar_path}")
+            
+            # Cập nhật profile
+            profile = current_user.profile or Profile(user_id=current_user.id)
+            profile.avatar = filename
+            
+            if not current_user.profile:
+                db.session.add(profile)
+            
+            db.session.commit()
+            app.logger.info(f"Đã cập nhật avatar thành công: {filename}")
+            
+            # Trả về phản hồi JSON nếu là Ajax request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': True, 
+                    'message': 'Cập nhật ảnh đại diện thành công', 
+                    'avatar_url': url_for('static', filename=f'uploads/avatars/{filename}')
+                })
+            
+            flash('Cập nhật ảnh đại diện thành công', 'success')
+        except Exception as e:
+            app.logger.error(f"Lỗi khi cập nhật avatar: {str(e)}", exc_info=True)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': False, 'message': f'Lỗi: {str(e)}'}), 500
+            flash(f'Có lỗi xảy ra: {str(e)}', 'danger')
     else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'success': False, 
+                'message': 'File không hợp lệ. Chỉ chấp nhận file ảnh (png, jpg, jpeg, gif)'
+            }), 400
         flash('File không hợp lệ. Chỉ chấp nhận file ảnh (png, jpg, jpeg, gif)', 'danger')
     
     return redirect(url_for('profile'))
@@ -1312,9 +1438,40 @@ def utc_to_local(utc_dt):
 @app.route('/social/feed')
 @login_required
 def social_feed():
-    posts = Post.query.order_by(Post.created_at.desc()).all()
+    # Get all alumni profiles
+    alumni_profiles = User.query.filter_by(role='alumni').join(Profile).order_by(User.created_at.desc()).all()
+    
+    # Get statistics
+    total_alumni = len(alumni_profiles)
+    total_companies = db.session.query(Profile.company).filter(Profile.company.isnot(None)).distinct().count()
+    
+    # Group alumni by graduation year
+    alumni_by_year = {}
+    for alumni in alumni_profiles:
+        if alumni.profile and alumni.profile.graduation_year:
+            year = alumni.profile.graduation_year
+            if year not in alumni_by_year:
+                alumni_by_year[year] = []
+            alumni_by_year[year].append(alumni)
+    
+    # Sort years in descending order
+    sorted_years = sorted(alumni_by_year.keys(), reverse=True)
+    
+    # Get featured alumni (example: those with complete profiles)
+    featured_alumni = []
+    for alumni in alumni_profiles:
+        if alumni.profile and all([
+            alumni.profile.avatar,
+            alumni.profile.bio,
+            alumni.profile.company,
+            alumni.profile.position
+        ]):
+            featured_alumni.append(alumni)
+            if len(featured_alumni) >= 6:  # Limit to 6 featured alumni
+                break
     
     # Convert UTC time to local time for each post
+    posts = Post.query.order_by(Post.created_at.desc()).all()
     for post in posts:
         post.local_time = utc_to_local(post.created_at)
         for comment in post.comments:
@@ -1322,7 +1479,16 @@ def social_feed():
     
     # Add users_online variable for the template
     users_online = User.query.filter(User.id != current_user.id).count()
-    return render_template('social/feed.html', posts=posts, users_online=users_online)
+    
+    return render_template('social/feed.html',
+                         posts=posts,
+                         users_online=users_online,
+                         alumni_profiles=alumni_profiles,
+                         total_alumni=total_alumni,
+                         total_companies=total_companies,
+                         alumni_by_year=alumni_by_year,
+                         sorted_years=sorted_years,
+                         featured_alumni=featured_alumni)
 
 @app.route('/social/my-posts')
 @login_required
@@ -1337,13 +1503,13 @@ def user_posts():
             comment.local_time = utc_to_local(comment.created_at)
     
     # Calculate statistics for sidebar
-    total_likes = sum(post.likers.count() for post in user_posts)
-    total_comments = sum(post.comments.count() for post in user_posts)
+    total_likes = sum(len(post.likers.all()) for post in user_posts)
+    total_comments = sum(len(post.comments) for post in user_posts)
     
     # Find the most liked post
     most_liked_post = None
     if user_posts:
-        most_liked_post = max(user_posts, key=lambda post: post.likers.count(), default=None)
+        most_liked_post = max(user_posts, key=lambda post: len(post.likers.all()), default=None)
     
     return render_template('social/user_posts.html', 
                            user_posts=user_posts, 
@@ -1362,29 +1528,63 @@ def create_post():
         flash('Nội dung bài đăng không được để trống', 'danger')
         return redirect(url_for('social_feed'))
     
-    # Make sure we're using the correct field name as defined in the Post model
+    # Create post without image first
     post = Post(content=content, user_id=current_user.id)
     
-    # Priority: 1. Image URL (if provided), 2. Uploaded image
+    # Process image - Priority: 1. External image URL, 2. Uploaded image
     if image_url and image_url.strip():
         # Use the image URL directly
         post.image_url = image_url.strip()
+        app.logger.info(f"Using external image URL: {post.image_url}")
     elif image and image.filename:
-        filename = secure_filename(image.filename)
-        # Create the directory if it doesn't exist
-        post_upload_dir = os.path.join('static', 'uploads', 'posts')
-        os.makedirs(post_upload_dir, exist_ok=True)
+        try:
+            # Validate image file
+            if not allowed_file(image.filename, {'png', 'jpg', 'jpeg', 'gif'}):
+                flash('Định dạng file không được hỗ trợ. Chỉ chấp nhận PNG, JPG, JPEG, GIF', 'danger')
+                return redirect(url_for('social_feed'))
+            
+            # Process filename safely
+            filename = secure_filename(image.filename)
+            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+            unique_filename = f"{timestamp}_{filename}"
+            
+            # Ensure upload directory exists
+            upload_folder = os.path.join('static', 'uploads', 'posts')
+            os.makedirs(upload_folder, exist_ok=True)
+            
+            # Full path to save the file
+            image_path = os.path.join(upload_folder, unique_filename)
+            
+            # Save the image file
+            image.save(image_path)
+            
+            # Verify the file was saved successfully
+            if not os.path.exists(image_path):
+                raise FileNotFoundError(f"Failed to save image to {image_path}")
+            
+            # Store the relative path in the database (without "static/" prefix)
+            post.image_url = f"uploads/posts/{unique_filename}"
+            
+            app.logger.info(f"Saved image to: {image_path}")
+            app.logger.info(f"Stored in database as: {post.image_url}")
         
-        # Save the image with a timestamp to avoid filename conflicts
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        filename = f"{timestamp}_{filename}"
-        image_path = os.path.join(post_upload_dir, filename)
-        image.save(image_path)
-        post.image_url = filename
+        except Exception as e:
+            error_msg = f"Error processing image upload: {str(e)}"
+            app.logger.error(error_msg, exc_info=True)
+            flash(f'Có lỗi xảy ra khi tải lên hình ảnh: {str(e)}', 'danger')
+            return redirect(url_for('social_feed'))
     
-    db.session.add(post)
-    db.session.commit()
-    flash('Bài viết đã được tạo thành công!', 'success')
+    # Save the post to the database
+    try:
+        db.session.add(post)
+        db.session.commit()
+        flash('Bài viết đã được tạo thành công!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        error_msg = f"Error saving post to database: {str(e)}"
+        app.logger.error(error_msg, exc_info=True)
+        flash(f'Có lỗi xảy ra khi lưu bài viết: {str(e)}', 'danger')
+    
     return redirect(url_for('social_feed'))
 
 @app.route('/social/posts/<int:post_id>/edit', methods=['GET', 'POST'])
@@ -1412,9 +1612,9 @@ def edit_post(post_id):
         # Handle image removal if requested
         if remove_image and post.image_url and not post.image_url.startswith('http'):
             # Only delete local files, not external URLs
-            old_image_path = os.path.join('static', 'uploads', 'posts', post.image_url)
-            if os.path.exists(old_image_path):
-                os.remove(old_image_path)
+            image_path = os.path.join('static', post.image_url)
+            if os.path.exists(image_path):
+                os.remove(image_path)
             post.image_url = None
         
         # Priority: 1. Image URL (if provided), 2. Uploaded image
@@ -1424,7 +1624,7 @@ def edit_post(post_id):
         elif image and image.filename:
             # Delete old local image if it exists
             if post.image_url and not post.image_url.startswith('http'):
-                old_image_path = os.path.join('static', 'uploads', 'posts', post.image_url)
+                old_image_path = os.path.join('static', post.image_url)
                 if os.path.exists(old_image_path):
                     os.remove(old_image_path)
             
@@ -1433,12 +1633,16 @@ def edit_post(post_id):
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
             filename = f"{timestamp}_{filename}"
             
-            post_upload_dir = os.path.join('static', 'uploads', 'posts')
-            os.makedirs(post_upload_dir, exist_ok=True)
+            # Ensure directory exists
+            upload_folder = os.path.join('static', 'uploads', 'posts')
+            os.makedirs(upload_folder, exist_ok=True)
             
-            image_path = os.path.join(post_upload_dir, filename)
+            # Save file to path
+            image_path = os.path.join(upload_folder, filename)
             image.save(image_path)
-            post.image_url = filename
+            
+            # Lưu đường dẫn tương đối vào cơ sở dữ liệu
+            post.image_url = f"uploads/posts/{filename}"
         
         db.session.commit()
         flash('Bài viết đã được cập nhật thành công!', 'success')
@@ -1457,8 +1661,8 @@ def delete_social_post(post_id):
         return redirect(url_for('social_feed'))
     
     # Delete the post's image if it exists
-    if post.image_url:
-        image_path = os.path.join('static', 'uploads', 'posts', post.image_url)
+    if post.image_url and not post.image_url.startswith('http'):
+        image_path = os.path.join('static', post.image_url)
         if os.path.exists(image_path):
             os.remove(image_path)
     
@@ -1494,12 +1698,8 @@ def toggle_like(post_id):
     db.session.commit()
     return jsonify({
         'success': True,
-        'likes_count': post.likers.count()
+        'likes_count': len(post.likers.all())
     })
-
-
-
-
 
 @app.template_global()
 def update_url(args, **kwargs):
@@ -1528,6 +1728,483 @@ def init_admin():
         db.session.commit()
         return "Admin user created successfully!"
     return "Admin user already exists!"
+
+@app.route('/alumni/events')
+@login_required
+def alumni_events():
+    if current_user.role != 'alumni':
+        flash('Bạn không có quyền truy cập trang này.', 'danger')
+        return redirect(url_for('index'))
+    
+    # Lấy danh sách sự kiện của alumni hiện tại
+    events = Event.query.filter_by(creator_id=current_user.id).order_by(Event.created_at.desc()).all()
+    
+    # Thống kê
+    total_events = len(events)
+    upcoming_events = sum(1 for event in events if event.start_time.replace(tzinfo=None) > datetime.now().replace(tzinfo=None))
+    past_events = sum(1 for event in events if event.start_time.replace(tzinfo=None) <= datetime.now().replace(tzinfo=None))
+    published_events = sum(1 for event in events if event.is_published)
+    
+    return render_template('alumni/events.html', events=events, total_events=total_events, 
+                         upcoming_events=upcoming_events, past_events=past_events, 
+                         published_events=published_events)
+
+@app.route('/alumni/add_event', methods=['GET', 'POST'])
+@login_required
+def alumni_add_event():
+    if current_user.role != 'alumni':
+        flash('Bạn không có quyền truy cập', 'danger')
+        return redirect(url_for('index'))
+
+    form = EventForm()
+    
+    if form.validate_on_submit():
+        try:
+            # Create new event
+            event = Event(
+                title=form.title.data,
+                description=form.description.data,
+                start_time=form.start_time.data.replace(tzinfo=UTC),
+                location=form.location.data,
+                creator_id=current_user.id,
+                is_published=False
+            )
+            
+            # Handle optional fields
+            if form.end_time.data:
+                event.end_time = form.end_time.data.replace(tzinfo=UTC)
+            if form.capacity.data:
+                event.capacity = form.capacity.data
+            if form.requirements.data:
+                event.requirements = form.requirements.data
+            if form.contact_info.data:
+                event.contact_info = form.contact_info.data
+            
+            # Handle image upload
+            if form.image.data:
+                file = form.image.data
+                if file and file.filename:
+                    # Check file size (max 5MB)
+                    if len(file.read()) > 5 * 1024 * 1024:
+                        flash('Ảnh sự kiện không được vượt quá 5MB', 'danger')
+                        return render_template('alumni/add_event.html', form=form)
+                    file.seek(0)  # Reset file pointer after reading
+                    
+                    if allowed_file(file.filename, {'png', 'jpg', 'jpeg'}):
+                        filename = secure_filename(f"event_{current_user.id}_{int(time.time())}_{file.filename}")
+                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'events', filename)
+                        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                        file.save(file_path)
+                        event.image = filename
+                    else:
+                        flash('Ảnh sự kiện không hợp lệ. Chỉ chấp nhận file PNG, JPG', 'danger')
+                        return render_template('alumni/add_event.html', form=form)
+            
+            db.session.add(event)
+            db.session.commit()
+            
+            flash('Tạo sự kiện thành công! Sự kiện của bạn đang chờ duyệt.', 'success')
+            return redirect(url_for('alumni_events'))
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error creating event: {str(e)}")
+            flash('Có lỗi xảy ra khi tạo sự kiện. Vui lòng thử lại sau.', 'danger')
+            return render_template('alumni/add_event.html', form=form)
+    
+    return render_template('alumni/add_event.html', form=form)
+
+@app.route('/alumni/edit_event/<int:event_id>', methods=['GET', 'POST'])
+@login_required
+def edit_event(event_id):
+    if current_user.role != 'alumni':
+        flash('Bạn không có quyền truy cập', 'danger')
+        return redirect(url_for('index'))
+    
+    event = Event.query.get_or_404(event_id)
+    if event.creator_id != current_user.id:
+        flash('Bạn không có quyền chỉnh sửa sự kiện này', 'danger')
+        return redirect(url_for('alumni_events'))
+    
+    form = EventForm(obj=event)
+
+    if form.validate_on_submit():
+        try:
+            # Update event information
+            form.populate_obj(event)
+            
+            # Convert datetime to UTC
+            event.start_time = event.start_time.replace(tzinfo=UTC)
+            if event.end_time:
+                event.end_time = event.end_time.replace(tzinfo=UTC)
+            
+            # Handle image upload
+            if form.image.data:
+                file = form.image.data
+                if file and file.filename and allowed_file(file.filename, {'png', 'jpg', 'jpeg'}):
+                    # Delete old image if exists
+                    if event.image:
+                        old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'events', event.image)
+                        if os.path.exists(old_image_path):
+                            os.remove(old_image_path)
+                    
+                    filename = secure_filename(f"event_{current_user.id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}")
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'events', filename)
+                    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                    file.save(file_path)
+                    event.image = filename
+                elif file and file.filename:
+                    flash('Ảnh sự kiện không hợp lệ. Chỉ chấp nhận file PNG, JPG', 'danger')
+                    return render_template('alumni/edit_event.html', form=form, event=event)
+            
+            db.session.commit()
+            flash('Cập nhật sự kiện thành công', 'success')
+            return redirect(url_for('alumni_events'))
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error updating event {event_id}: {str(e)}")
+            flash(f'Đã xảy ra lỗi khi cập nhật sự kiện: {str(e)}', 'danger')
+            return render_template('alumni/edit_event.html', form=form, event=event)
+    
+    return render_template('alumni/edit_event.html', form=form, event=event)
+
+@app.route('/alumni/delete_event/<int:event_id>', methods=['POST'])
+@login_required
+def delete_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    if event.creator_id != current_user.id and current_user.role != 'admin':
+        flash('Bạn không có quyền xóa sự kiện này', 'danger')
+        return redirect(url_for('index'))
+    
+    # Delete image if exists
+    if event.image:
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'events', event.image)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+    
+    db.session.delete(event)
+    db.session.commit()
+    flash('Đã xóa sự kiện', 'success')
+    return redirect(url_for('alumni_events'))
+
+@app.route('/event/<int:event_id>')
+def event_detail(event_id):
+    event = Event.query.get_or_404(event_id)
+    
+    # Check if event is published or current user is the creator or admin
+    if not event.is_published and (not current_user.is_authenticated or 
+                                 (current_user.id != event.creator_id and current_user.role != 'admin')):
+        flash('Sự kiện này chưa được công khai.', 'warning')
+        return redirect(url_for('index'))
+    
+    # Get registrations count
+    registrations_count = EventRegistration.query.filter_by(event_id=event_id).count()
+    
+    # Check if user is registered
+    user_registered = False
+    if current_user.is_authenticated:
+        user_registered = EventRegistration.query.filter_by(
+            event_id=event_id, user_id=current_user.id).first() is not None
+    
+    return render_template('alumni/event_detail.html', 
+                         event=event, 
+                         registrations_count=registrations_count,
+                         user_registered=user_registered)
+
+@app.route('/event/<int:event_id>/register', methods=['POST'])
+@login_required
+def register_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    
+    # Check if event is already full
+    if event.capacity:
+        current_registrations = EventRegistration.query.filter_by(event_id=event_id).count()
+        if current_registrations >= event.capacity:
+            flash('Sự kiện đã đầy, không thể đăng ký thêm.', 'warning')
+            return redirect(url_for('event_detail', event_id=event_id))
+    
+    # Check if user already registered
+    existing_registration = EventRegistration.query.filter_by(
+        event_id=event_id, user_id=current_user.id).first()
+    
+    if existing_registration:
+        flash('Bạn đã đăng ký tham gia sự kiện này rồi.', 'info')
+        return redirect(url_for('event_detail', event_id=event_id))
+    
+    # Create new registration
+    registration = EventRegistration(
+        event_id=event_id,
+        user_id=current_user.id,
+        status='registered'
+    )
+    
+    db.session.add(registration)
+    db.session.commit()
+    flash('Đăng ký tham gia sự kiện thành công!', 'success')
+    return redirect(url_for('event_detail', event_id=event_id))
+
+@app.route('/event/<int:event_id>/cancel', methods=['POST'])
+@login_required
+def cancel_event_registration(event_id):
+    registration = EventRegistration.query.filter_by(
+        event_id=event_id, user_id=current_user.id).first()
+    
+    if not registration:
+        flash('Bạn chưa đăng ký tham gia sự kiện này.', 'warning')
+        return redirect(url_for('event_detail', event_id=event_id))
+    
+    # Check if the event is in the future
+    event = Event.query.get_or_404(event_id)
+    if event.start_time <= datetime.now(UTC):
+        flash('Không thể hủy đăng ký cho sự kiện đã diễn ra.', 'danger')
+        return redirect(url_for('event_detail', event_id=event_id))
+    
+    registration.status = 'canceled'
+    db.session.commit()
+    flash('Đã hủy đăng ký tham gia sự kiện.', 'success')
+    return redirect(url_for('event_detail', event_id=event_id))
+
+@app.route('/alumni/event/<int:event_id>/registrations')
+@login_required
+def event_registrations(event_id):
+    event = Event.query.get_or_404(event_id)
+    if current_user.role != 'alumni' or event.creator_id != current_user.id:
+        flash('Bạn không có quyền truy cập trang này.', 'danger')
+        return redirect(url_for('index'))
+    
+    # Get filter parameters
+    status = request.args.get('status', '')
+    search = request.args.get('search', '')
+    
+    # Build query
+    registrations = EventRegistration.query.filter_by(event_id=event_id)
+    
+    # Apply filters
+    if status:
+        registrations = registrations.filter_by(status=status)
+    
+    if search:
+        registrations = registrations.join(User).filter(
+            or_(
+                User.name.ilike(f'%{search}%'),
+                User.email.ilike(f'%{search}%')
+            )
+        )
+    
+    # Execute query
+    registrations = registrations.all()
+    
+    return render_template('alumni/event_registrations.html',
+                         event=event,
+                         registrations=registrations)
+
+@app.route('/alumni/event/registration/<int:registration_id>/update', methods=['POST'])
+@login_required
+def update_registration_status(registration_id):
+    registration = EventRegistration.query.get_or_404(registration_id)
+    event = Event.query.get_or_404(registration.event_id)
+    
+    if current_user.role != 'alumni' or event.creator_id != current_user.id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    data = request.get_json()
+    new_status = data.get('status')
+    
+    if new_status not in ['registered', 'canceled', 'attended']:
+        return jsonify({'error': 'Invalid status'}), 400
+    
+    registration.status = new_status
+    db.session.commit()
+    
+    return jsonify({'success': True})
+
+@app.route('/admin/events')
+@login_required
+def admin_events():
+    """Display all events for admin management."""
+    if current_user.role != 'admin':
+        flash('Bạn không có quyền truy cập', 'danger')
+        return redirect(url_for('index'))
+    events = Event.query.order_by(Event.created_at.desc()).all()
+    return render_template('admin/events.html', events=events)
+
+@app.route('/admin/events/confirm/<int:event_id>', methods=['POST'])
+@login_required
+def admin_confirm_event(event_id):
+    if current_user.role != 'admin':
+        flash('Bạn không có quyền truy cập', 'danger')
+        return redirect(url_for('admin_dashboard'))
+    event = Event.query.get_or_404(event_id)
+    event.is_published = True
+    db.session.commit()
+    flash(f'Đã duyệt sự kiện "{event.title}"', 'success')
+    return redirect(url_for('admin_events'))
+    
+@app.route('/admin/events/delete/<int:event_id>', methods=['POST'])
+@login_required
+def admin_delete_event(event_id):
+    if current_user.role != 'admin':
+        flash('Bạn không có quyền truy cập', 'danger')
+        return redirect(url_for('admin_dashboard'))
+
+    event = Event.query.get_or_404(event_id)
+    event_title = event.title # Get title before deleting
+    
+    # Delete image if exists
+    if event.image:
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'events', event.image)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+    
+    db.session.delete(event)
+    db.session.commit()
+    flash(f'Đã xóa sự kiện "{event_title}"', 'success')
+    return redirect(request.referrer or url_for('admin_events'))
+
+@app.route('/events')
+def events():
+    # Get search parameters
+    keyword = request.args.get('keyword', '').strip()
+    location = request.args.get('location', '')
+    date_filter = request.args.get('date', '')
+    sort = request.args.get('sort', 'newest')
+    
+    # Base query for published events
+    query = Event.query.filter_by(is_published=True)
+    
+    # Apply filters
+    if keyword:
+        search_term = f"%{keyword}%"
+        query = query.filter(or_(
+            Event.title.ilike(search_term),
+            Event.description.ilike(search_term),
+            Event.location.ilike(search_term)
+        ))
+    
+    if location:
+        query = query.filter(Event.location.ilike(f"%{location}%"))
+    
+    # Apply date filter
+    now = datetime.now(UTC)
+    if date_filter == 'upcoming':
+        query = query.filter(Event.start_time > now)
+    elif date_filter == 'today':
+        today_start = datetime.combine(now.date(), datetime.min.time(), tzinfo=UTC)
+        today_end = datetime.combine(now.date(), datetime.max.time(), tzinfo=UTC)
+        query = query.filter(and_(Event.start_time >= today_start, Event.start_time <= today_end))
+    elif date_filter == 'week':
+        week_end = now + timedelta(days=7)
+        query = query.filter(and_(Event.start_time >= now, Event.start_time <= week_end))
+    elif date_filter == 'month':
+        month_end = now + timedelta(days=30)
+        query = query.filter(and_(Event.start_time >= now, Event.start_time <= month_end))
+    elif date_filter == 'past':
+        query = query.filter(Event.start_time <= now)
+    
+    # Apply sorting
+    if sort == 'newest':
+        query = query.order_by(Event.created_at.desc())
+    elif sort == 'upcoming':
+        query = query.filter(Event.start_time > now).order_by(Event.start_time.asc())
+    elif sort == 'popular':
+        query = query.join(EventRegistration).group_by(Event.id).order_by(func.count(EventRegistration.id).desc())
+    
+    # Execute query
+    events = query.all()
+    
+    return render_template('events.html',
+                         events=events,
+                         keyword=keyword,
+                         location=location,
+                         date_filter=date_filter,
+                         sort=sort)
+
+@app.route('/user/events')
+@login_required
+def user_events():
+    """Display events the user has registered for."""
+    # Get user's event registrations
+    registrations = EventRegistration.query.filter_by(user_id=current_user.id).all()
+    
+    # Get events from registrations
+    events = []
+    for registration in registrations:
+        event = Event.query.get(registration.event_id)
+        if event:
+            events.append({
+                'event': event,
+                'registration_status': registration.status,
+                'registration_date': registration.created_at
+            })
+    
+    # Sort events by start time
+    events.sort(key=lambda x: x['event'].start_time)
+    
+    # Separate upcoming and past events
+    now = datetime.now(UTC)
+    upcoming_events = [e for e in events if e['event'].start_time > now]
+    past_events = [e for e in events if e['event'].start_time <= now]
+    
+    return render_template('user/events.html',
+                         upcoming_events=upcoming_events,
+                         past_events=past_events)
+
+# Make sure to create the events folder for uploads
+os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'events'), exist_ok=True)
+
+@app.route('/test_image_display')
+def test_image_display():
+    """Trang kiểm tra hiển thị hình ảnh từ static folder"""
+    image_files = []
+    posts_dir = os.path.join('static', 'uploads', 'posts')
+    if os.path.exists(posts_dir):
+        image_files = os.listdir(posts_dir)
+    
+    return render_template(
+        'test_image.html', 
+        image_files=image_files,
+        posts_path=posts_dir
+    )
+
+@app.route('/remove_avatar', methods=['POST'])
+@login_required
+def remove_avatar():
+    try:
+        # Kiểm tra xem người dùng có avatar không
+        if current_user.profile and current_user.profile.avatar:
+            # Xóa file avatar cũ
+            old_avatar_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', current_user.profile.avatar)
+            if os.path.exists(old_avatar_path):
+                os.remove(old_avatar_path)
+                app.logger.info(f"Đã xóa avatar: {old_avatar_path}")
+            
+            # Cập nhật thông tin trong database
+            current_user.profile.avatar = None
+            db.session.commit()
+            
+            # Trả về phản hồi JSON nếu là Ajax request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': True,
+                    'message': 'Đã xóa ảnh đại diện'
+                })
+            
+            flash('Đã xóa ảnh đại diện', 'success')
+        else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': False,
+                    'message': 'Không tìm thấy ảnh đại diện'
+                }), 404
+            flash('Không tìm thấy ảnh đại diện', 'warning')
+    except Exception as e:
+        app.logger.error(f"Lỗi khi xóa avatar: {str(e)}", exc_info=True)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': f'Lỗi: {str(e)}'}), 500
+        flash(f'Có lỗi xảy ra: {str(e)}', 'danger')
+    
+    return redirect(url_for('profile'))
 
 if __name__ == '__main__':
     with app.app_context():

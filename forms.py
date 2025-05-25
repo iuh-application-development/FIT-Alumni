@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, PasswordField, SelectField, IntegerField, DateField, FileField, BooleanField, EmailField
+from wtforms import StringField, TextAreaField, PasswordField, SelectField, IntegerField, DateField, FileField, BooleanField, EmailField, DateTimeField
 from wtforms.validators import DataRequired, Email, Length, Optional, NumberRange, ValidationError
 from datetime import datetime
 import email_validator
@@ -59,4 +59,23 @@ class JobForm(FlaskForm):
 
     def validate_deadline(self, field):
         if field.data and field.data < datetime.now().date():
-            raise ValidationError('Hạn nộp hồ sơ phải lớn hơn ngày hiện tại') 
+            raise ValidationError('Hạn nộp hồ sơ phải lớn hơn ngày hiện tại')
+
+class EventForm(FlaskForm):
+    title = StringField('Tên sự kiện', validators=[DataRequired(), Length(min=5, max=200)])
+    description = TextAreaField('Mô tả sự kiện', validators=[DataRequired(), Length(min=10)])
+    start_time = DateTimeField('Thời gian bắt đầu', validators=[DataRequired()], format='%Y-%m-%dT%H:%M')
+    end_time = DateTimeField('Thời gian kết thúc', validators=[Optional()], format='%Y-%m-%dT%H:%M')
+    location = StringField('Địa điểm', validators=[DataRequired(), Length(min=5, max=200)])
+    capacity = IntegerField('Sức chứa', validators=[Optional(), NumberRange(min=1)])
+    requirements = TextAreaField('Yêu cầu tham gia', validators=[Optional()])
+    contact_info = TextAreaField('Thông tin liên hệ', validators=[Optional()])
+    image = FileField('Ảnh sự kiện', validators=[Optional()])
+
+    def validate_start_time(self, field):
+        if field.data and field.data < datetime.now():
+            raise ValidationError('Thời gian bắt đầu phải lớn hơn thời gian hiện tại')
+    
+    def validate_end_time(self, field):
+        if field.data and self.start_time.data and field.data <= self.start_time.data:
+            raise ValidationError('Thời gian kết thúc phải lớn hơn thời gian bắt đầu') 
