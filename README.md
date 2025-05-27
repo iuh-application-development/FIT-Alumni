@@ -119,6 +119,7 @@ http://localhost:5000
 4. Roy, S. & Saha, S. (2016). *Web-Based Alumni Information System* - IEEE CSE.
 5. Ngô Văn Tùng (2020). *Ứng dụng hệ thống alumni trong nâng cao chất lượng đào tạo* - Tạp chí Giáo dục.
 
+
 ## Tài nguyên bổ sung
 
 - Video demo, báo cáo chi tiết và bản trình chiếu có thể được truy cập tại:  
