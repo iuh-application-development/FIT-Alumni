@@ -32,7 +32,7 @@
                             {{ 'Toàn thời gian' if job.type == 'fulltime' else 'Bán thời gian' if job.type == 'parttime' else 'Thực tập' }}
                         </span>
                         <span class="text-muted">
-                            <i class="fas fa-clock me-1"></i>Hạn nộp: {{ job.deadline.strftime('%d/%m/%Y') }}
+                            {% if job.deadline %}<i class="fas fa-clock me-1"></i>Hạn nộp: {{ job.deadline.strftime('%d/%m/%Y') }}{% endif %}
                         </span>
                     </div>
                     <div class="d-flex gap-2">
@@ -168,8 +168,8 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    {% if application.applicant.profile and application.applicant.profile.avatar %}
-                                        <img src="{{ url_for('static', filename='uploads/avatars/' + application.applicant.profile.avatar) }}" 
+                                    {% if application.user.profile and application.user.profile.avatar %}
+                                        <img src="{{ url_for('static', filename='uploads/avatars/' + application.user.profile.avatar) }}" 
                                              class="user-avatar me-2" alt="Avatar">
                                     {% else %}
                                         <div class="user-avatar-placeholder me-2">
@@ -177,13 +177,13 @@
                                         </div>
                                     {% endif %}
                                     <div>
-                                        <h6 class="mb-0">{{ application.applicant.name }}</h6>
-                                        <small class="text-muted">{{ application.applicant.profile.position if application.applicant.profile else 'Chưa cập nhật' }}</small>
+                                        <h6 class="mb-0">{{ application.user.name }}</h6>
+                                        <small class="text-muted">{{ application.user.profile.position if application.user.profile else 'Chưa cập nhật' }}</small>
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ application.applicant.email }}</td>
-                            <td>{{ application.applicant.profile.phone if application.applicant.profile else 'Chưa cập nhật' }}</td>
+                            <td>{{ application.user.email }}</td>
+                            <td>{{ application.user.profile.phone if application.user.profile else 'Chưa cập nhật' }}</td>
                             <td>
                                 <span class="badge bg-{{ 'success' if application.status == 'accepted' else 'warning' if application.status == 'pending' else 'danger' }}">
                                     {{ 'Đã chấp nhận' if application.status == 'accepted' else 'Đang chờ' if application.status == 'pending' else 'Đã từ chối' }}
@@ -196,7 +196,7 @@
                             <td>
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-sm btn-outline-primary"
-                                            onclick="showApplicationDetails({{ application.id }})">
+                                            onclick="showApplicationDetails({{ application.id | tojson | safe }})">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <div class="btn-group">
@@ -207,13 +207,13 @@
                                         <ul class="dropdown-menu">
                                             <li>
                                                 <a class="dropdown-item" href="#" 
-                                                   onclick="updateStatus({{ application.id }}, 'accepted')">
+                                                   onclick="updateStatus({{ application.id | tojson | safe }}, 'accepted')">
                                                     Chấp nhận
                                                 </a>
                                             </li>
                                             <li>
                                                 <a class="dropdown-item" href="#" 
-                                                   onclick="updateStatus({{ application.id }}, 'rejected')">
+                                                   onclick="updateStatus({{ application.id | tojson | safe }}, 'rejected')">
                                                     Từ chối
                                                 </a>
                                             </li>
@@ -510,12 +510,12 @@ function showApplicationDetails(applicationId) {
     modal.show();
     
     // Fetch application details
-    fetch(`/alumni/applications/${applicationId}/details`)
+    fetch(`/application/${applicationId}/details`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 // Update modal content
-                modalTitle.textContent = `Thông tin ứng viên - ${data.application.applicant.name}`;
+                modalTitle.textContent = `Thông tin ứng viên - ${data.user.name}`;
                 modalContent.innerHTML = data.html;
                 
                 // Update action buttons
@@ -556,10 +556,10 @@ function showApplicationDetails(applicationId) {
 // Update application status
 function updateStatus(applicationId, status) {
     if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái?')) {
-        fetch(`/alumni/applications/${applicationId}/update_status`, {
+        fetch(`/application/${applicationId}/status`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ status: status })
         })

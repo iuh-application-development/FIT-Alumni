@@ -11,19 +11,36 @@
                     <div class="text-center mb-4">
                         <div class="position-relative d-inline-block mb-3">
                             {% if profile and profile.avatar %}
-                            <img src="{{ url_for('uploaded_file', filename=profile.avatar) }}" 
-                                 alt="Avatar" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                            <div class="position-relative">
+                                <!-- Debug đường dẫn avatar -->
+                                <p class="debug text-muted small">Avatar path: {{ profile.avatar }}</p>
+                                <img src="{{ url_for('static', filename='uploads/avatars/' + profile.avatar) }}" 
+                                     alt="Avatar" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;"
+                                     onerror="this.onerror=null; this.src='/static/default-avatar.png';">
+                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" 
+                                        onclick="removeAvatar()" data-bs-toggle="tooltip" title="Xóa ảnh đại diện"
+                                        style="border-radius: 50%; width: 30px; height: 30px; padding: 0; display: flex; justify-content: center; align-items: center;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <label for="avatar" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm" 
+                                       style="cursor: pointer;" data-bs-toggle="tooltip" title="Thay đổi ảnh đại diện">
+                                    <i class="fas fa-camera text-primary"></i>
+                                    <input type="file" id="avatar" name="avatar" class="d-none" accept="image/png,image/jpeg,image/jpg" onchange="previewImage(this);">
+                                </label>
+                            </div>
                             {% else %}
-                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" 
-                                 style="width: 150px; height: 150px;">
-                                <i class="fas fa-user fa-3x text-muted"></i>
+                            <div class="position-relative">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" 
+                                     style="width: 150px; height: 150px;">
+                                    <i class="fas fa-user fa-3x text-muted"></i>
+                                </div>
+                                <label for="avatar" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm" 
+                                       style="cursor: pointer;" data-bs-toggle="tooltip" title="Thêm ảnh đại diện">
+                                    <i class="fas fa-camera text-primary"></i>
+                                    <input type="file" id="avatar" name="avatar" class="d-none" accept="image/png,image/jpeg,image/jpg" onchange="previewImage(this);">
+                                </label>
                             </div>
                             {% endif %}
-                            <label for="avatar" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm" 
-                                   style="cursor: pointer;">
-                                <i class="fas fa-camera text-primary"></i>
-                                <input type="file" id="avatar" name="avatar" class="d-none" accept="image/*" onchange="previewImage(this);">
-                            </label>
                         </div>
                         <h2 class="h3 mb-3">Chỉnh sửa hồ sơ</h2>
                         <p class="text-muted">Cập nhật thông tin cá nhân của bạn</p>
@@ -97,6 +114,16 @@
                                     <input type="text" class="form-control" id="position" name="position" 
                                            value="{{ profile.position if profile else '' }}">
                                 </div>
+                                <div class="mb-3">
+                                    <label for="graduation_year" class="form-label">Năm tốt nghiệp</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-graduation-cap"></i></span>
+                                        <input type="number" class="form-control" id="graduation_year" name="graduation_year" 
+                                               value="{{ profile.graduation_year if profile and profile.graduation_year else '' }}"
+                                               min="1990" max="{{ current_year }}" placeholder="Ví dụ: 2020">
+                                    </div>
+                                    <small class="form-text text-muted">Năm bạn tốt nghiệp đại học</small>
+                                </div>
                             </div>
                         </div>
 
@@ -128,12 +155,12 @@
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Ngày bắt đầu</label>
                                                 <input type="date" class="form-control" name="edu_start_date[]" 
-                                                       value="{{ edu.start_date }}" required>
+                                                       value="{{ edu.start_date.strftime('%Y-%m-%d') if edu.start_date else '' }}" required>
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Ngày kết thúc</label>
                                                 <input type="date" class="form-control" name="edu_end_date[]" 
-                                                       value="{{ edu.end_date }}" required>
+                                                       value="{{ edu.end_date.strftime('%Y-%m-%d') if edu.end_date else '' }}" required>
                                             </div>
                                         </div>
                                         <button type="button" class="btn btn-sm btn-danger" onclick="removeEducation(this)">
@@ -173,12 +200,12 @@
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Ngày bắt đầu</label>
                                                 <input type="date" class="form-control" name="exp_start_date[]" 
-                                                       value="{{ exp.start_date }}" required>
+                                                       value="{{ exp.start_date.strftime('%Y-%m-%d') if exp.start_date else '' }}" required>
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Ngày kết thúc</label>
                                                 <input type="date" class="form-control" name="exp_end_date[]" 
-                                                       value="{{ exp.end_date }}" required>
+                                                       value="{{ exp.end_date.strftime('%Y-%m-%d') if exp.end_date else '' }}" required>
                                             </div>
                                         </div>
                                         <div class="mb-3">
@@ -202,13 +229,20 @@
                             <div class="card-body">
                                 <div class="mb-3">
                                     <label class="form-label">Nhập kỹ năng và nhấn Enter hoặc dấu phẩy</label>
-                                    <div id="skills-input-container" class="form-control" style="min-height: 40px; height: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; padding: 5px;">
-                                        <!-- Tags will be added here -->
-                                        <input type="text" id="skill-input" class="flex-grow-1" style="border: none; outline: none; min-width: 100px; padding: 5px;" 
-                                               placeholder="Ví dụ: Python, JavaScript,...">
+                                    <div class="d-flex mb-2">
+                                        <div id="skills-input-container" class="form-control flex-grow-1" style="min-height: 40px; height: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; padding: 5px;">
+                                            <input type="text" id="skill-input" class="flex-grow-1" style="border: none; outline: none; min-width: 100px; padding: 5px;" 
+                                                placeholder="Ví dụ: Python, JavaScript,...">
+                                        </div>
+                                        <button type="button" id="add-skill-btn" class="btn btn-primary ms-2">
+                                            <i class="fas fa-plus"></i> Thêm
+                                        </button>
                                     </div>
                                     <input type="hidden" name="skills" id="skills-hidden-input" 
                                            value="{{ skills | map(attribute='name') | join(', ') }}">
+                                    <div class="small text-muted mt-1">
+                                        <i class="fas fa-info-circle"></i> Nhấn Enter hoặc dấu phẩy sau mỗi kỹ năng, hoặc nhấn nút Thêm.
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -231,11 +265,11 @@
 {% block scripts %}
 {{ super() }}
 <style>
-/* Basic styles for tags */
+/* Giữ nguyên styles hiện tại */
 .skill-tag {
     display: inline-flex;
     align-items: center;
-    background-color: #0d6efd; /* Bootstrap primary blue */
+    background-color: #0d6efd;
     color: white;
     padding: 3px 8px;
     border-radius: 4px;
@@ -253,16 +287,43 @@
     font-weight: bold;
     font-size: 1.1em;
 }
+
+/* Thêm style để ẩn debug nếu không cần */
+.debug {
+    display: none; /* Ẩn debug, chỉ bật khi cần */
+}
 </style>
 <script>
 function previewImage(input) {
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const container = input.closest('.position-relative');
+    
     if (input.files && input.files[0]) {
+        const file = input.files[0];
+        console.log("File selected:", file.name, "Type:", file.type, "Size:", file.size);
+
+        // Kiểm tra định dạng file
+        if (!validTypes.includes(file.type)) {
+            showAlert(container, 'danger', 'Vui lòng chọn file ảnh (PNG, JPG, JPEG)');
+            input.value = '';
+            return;
+        }
+        
+        // Kiểm tra kích thước file
+        if (file.size > maxSize) {
+            showAlert(container, 'danger', 'Kích thước file không được vượt quá 5MB');
+            input.value = '';
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = function(e) {
-            const container = input.closest('.position-relative');
+            console.log("Preview URL:", e.target.result);
             const currentImage = container.querySelector('img');
             const defaultAvatar = container.querySelector('.rounded-circle.bg-light');
             
+            // Hiển thị xem trước hình ảnh
             if (currentImage) {
                 currentImage.src = e.target.result;
             } else if (defaultAvatar) {
@@ -273,11 +334,155 @@ function previewImage(input) {
                 newImage.style.width = '150px';
                 newImage.style.height = '150px';
                 newImage.style.objectFit = 'cover';
+                newImage.onerror = function() {
+                    this.src = '/static/default-avatar.png'; // Ảnh mặc định nếu lỗi
+                };
                 defaultAvatar.replaceWith(newImage);
+                
+                // Thêm nút xóa
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'btn btn-sm btn-danger position-absolute top-0 end-0';
+                removeButton.style.borderRadius = '50%';
+                removeButton.style.width = '30px';
+                removeButton.style.height = '30px';
+                removeButton.style.padding = '0';
+                removeButton.style.display = 'flex';
+                removeButton.style.justifyContent = 'center';
+                removeButton.style.alignItems = 'center';
+                removeButton.setAttribute('data-bs-toggle', 'tooltip');
+                removeButton.setAttribute('title', 'Xóa ảnh đại diện');
+                removeButton.onclick = removeAvatar;
+                removeButton.innerHTML = '<i class="fas fa-times"></i>';
+                container.appendChild(removeButton);
+                
+                // Khởi tạo lại tooltip
+                new bootstrap.Tooltip(removeButton);
             }
-        }
-        reader.readAsDataURL(input.files[0]);
+            
+            // Hiển thị thông báo đang tải
+            const loadingMsg = showAlert(container, 'info', '<i class="fas fa-spinner fa-spin me-2"></i>Đang tải lên...');
+            
+            // Tạo form và gửi file avatar
+            const formData = new FormData();
+            formData.append('avatar', file);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (csrfToken) {
+                formData.append('csrf_token', csrfToken);
+            }
+            
+            fetch('{{ url_for("update_avatar") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log("Upload response status:", response.status);
+                if (!response.ok) throw new Error(`Lỗi server: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log("Upload response data:", data);
+                loadingMsg.remove();
+                if (data.success) {
+                    showAlert(container, 'success', `<i class="fas fa-check-circle me-2"></i>${data.message}`, 3000);
+                } else {
+                    throw new Error(data.message || 'Có lỗi xảy ra');
+                }
+            })
+            .catch(error => {
+                console.error("Upload error:", error);
+                loadingMsg.remove();
+                showAlert(container, 'danger', `<i class="fas fa-exclamation-circle me-2"></i>${error.message || 'Có lỗi xảy ra khi cập nhật ảnh đại diện'}`, 5000);
+            });
+        };
+        reader.readAsDataURL(file);
+    } else {
+        console.warn("No file selected");
     }
+}
+
+function showAlert(container, type, message, autoHide) {
+    const alertBox = document.createElement('div');
+    alertBox.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+    alertBox.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    container.parentNode.appendChild(alertBox);
+    
+    if (autoHide) {
+        setTimeout(() => {
+            alertBox.remove();
+        }, autoHide);
+    }
+    
+    return alertBox;
+}
+
+function removeAvatar() {
+    if (!confirm('Bạn có chắc chắn muốn xóa ảnh đại diện?')) {
+        return;
+    }
+    
+    const container = document.querySelector('.position-relative');
+    const loadingMsg = showAlert(container, 'info', '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...');
+    
+    const headers = {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json'
+    };
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (csrfToken) {
+        headers['X-CSRF-Token'] = csrfToken;
+    }
+    
+    fetch('{{ url_for("remove_avatar") }}', {
+        method: 'POST',
+        headers: headers
+    })
+    .then(response => {
+        console.log("Remove response status:", response.status);
+        if (!response.ok) throw new Error(`Lỗi server: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        console.log("Remove response data:", data);
+        loadingMsg.remove();
+        if (data.success) {
+            const avatarContainer = document.querySelector('.position-relative.d-inline-block.mb-3');
+            avatarContainer.innerHTML = `
+                <div class="position-relative">
+                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" 
+                         style="width: 150px; height: 150px;">
+                        <i class="fas fa-user fa-3x text-muted"></i>
+                    </div>
+                    <label for="avatar" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm" 
+                           style="cursor: pointer;" data-bs-toggle="tooltip" title="Thêm ảnh đại diện">
+                        <i class="fas fa-camera text-primary"></i>
+                        <input type="file" id="avatar" name="avatar" class="d-none" accept="image/png,image/jpeg,image/jpg" onchange="previewImage(this);">
+                    </label>
+                </div>
+            `;
+            
+            // Khởi tạo lại tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            showAlert(container, 'success', `<i class="fas fa-check-circle me-2"></i>${data.message}`, 3000);
+        } else {
+            throw new Error(data.message || 'Có lỗi xảy ra');
+        }
+    })
+    .catch(error => {
+        console.error("Remove error:", error);
+        loadingMsg.remove();
+        showAlert(container, 'danger', `<i class="fas fa-exclamation-circle me-2"></i>${error.message || 'Có lỗi xảy ra khi xóa ảnh đại diện'}`, 5000);
+    });
 }
 
 function addEducation() {
@@ -369,7 +574,6 @@ function validatePhone(input) {
     }
 }
 
-// Add form validation before submit
 document.getElementById('profileForm').addEventListener('submit', function(e) {
     const phoneInput = document.getElementById('phone');
     const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
@@ -417,7 +621,6 @@ addressInput.addEventListener('input', function(e) {
             addressSuggestions.innerHTML = suggestions;
             addressSuggestions.style.display = 'block';
             
-            // Add click event to suggestions
             const items = addressSuggestions.getElementsByClassName('suggestion-item');
             Array.from(items).forEach(item => {
                 item.addEventListener('click', function() {
@@ -443,7 +646,6 @@ addressInput.addEventListener('keydown', function(e) {
     const items = addressSuggestions.getElementsByClassName('suggestion-item');
     if (items.length === 0) return;
     
-    // Arrow down
     if (e.keyCode === 40) {
         currentFocus++;
         if (currentFocus >= items.length) currentFocus = 0;
@@ -451,7 +653,6 @@ addressInput.addEventListener('keydown', function(e) {
         items[currentFocus].classList.add('active');
         items[currentFocus].scrollIntoView({ block: 'nearest' });
     }
-    // Arrow up
     else if (e.keyCode === 38) {
         currentFocus--;
         if (currentFocus < 0) currentFocus = items.length - 1;
@@ -459,7 +660,6 @@ addressInput.addEventListener('keydown', function(e) {
         items[currentFocus].classList.add('active');
         items[currentFocus].scrollIntoView({ block: 'nearest' });
     }
-    // Enter
     else if (e.keyCode === 13 && currentFocus > -1) {
         e.preventDefault();
         if (items[currentFocus]) {
@@ -474,14 +674,12 @@ function removeActive() {
     Array.from(items).forEach(item => item.classList.remove('active'));
 }
 
-// Close suggestions when clicking outside
 document.addEventListener('click', function(e) {
     if (!addressInput.contains(e.target) && !addressSuggestions.contains(e.target)) {
         addressSuggestions.style.display = 'none';
     }
 });
 
-// Add styles for suggestions
 const style = document.createElement('style');
 style.textContent = `
     .suggestion-item {
@@ -494,22 +692,20 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// --- Skills Tag Input Logic ---
 const skillsContainer = document.getElementById('skills-input-container');
 const skillInput = document.getElementById('skill-input');
 const skillsHiddenInput = document.getElementById('skills-hidden-input');
 let skills = [];
 
-// Initialize tags from hidden input
 function initializeSkills() {
-    const initialSkills = skillsHiddenInput.value.split(',').map(s => s.trim()).filter(s => s);
-    skills = [...initialSkills];
+    const initialValue = skillsHiddenInput.value;
+    if (initialValue) {
+        skills = initialValue.split(',').map(s => s.trim()).filter(s => s);
+    }
     renderSkills();
 }
 
-// Render tags in the container
 function renderSkills() {
-    // Clear existing tags except the input field
     Array.from(skillsContainer.children).forEach(child => {
         if (child.id !== 'skill-input') {
             skillsContainer.removeChild(child);
@@ -520,10 +716,10 @@ function renderSkills() {
         const tag = createTagElement(skill, index);
         skillsContainer.insertBefore(tag, skillInput);
     });
+    
     updateHiddenInput();
 }
 
-// Create a single tag element
 function createTagElement(skill, index) {
     const tag = document.createElement('div');
     tag.className = 'skill-tag';
@@ -534,14 +730,16 @@ function createTagElement(skill, index) {
     
     const removeBtn = document.createElement('span');
     removeBtn.className = 'remove-tag';
-    removeBtn.textContent = '×'; // Multiplication sign as 'x'
-    removeBtn.onclick = () => removeSkill(index);
+    removeBtn.textContent = '×';
+    removeBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeSkill(index);
+    };
     tag.appendChild(removeBtn);
     
     return tag;
 }
 
-// Add a new skill
 function addSkill(skill) {
     const trimmedSkill = skill.trim();
     if (trimmedSkill && !skills.includes(trimmedSkill)) {
@@ -550,38 +748,64 @@ function addSkill(skill) {
     }
 }
 
-// Remove a skill by index
 function removeSkill(index) {
-    skills.splice(index, 1);
-    renderSkills();
+    if (index >= 0 && index < skills.length) {
+        skills.splice(index, 1);
+        renderSkills();
+    }
 }
 
-// Update the hidden input value
 function updateHiddenInput() {
     skillsHiddenInput.value = skills.join(', ');
 }
 
-// Event listener for the input field
 skillInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault(); // Prevent form submission on Enter and comma insertion
-        addSkill(skillInput.value);
-        skillInput.value = ''; // Clear input
+        e.preventDefault();
+        if (skillInput.value.trim()) {
+            addSkill(skillInput.value);
+            skillInput.value = '';
+        }
     }
-    // Handle Backspace to remove the last tag if input is empty
     else if (e.key === 'Backspace' && skillInput.value === '' && skills.length > 0) {
         removeSkill(skills.length - 1);
     }
 });
 
-// Focus input when clicking the container
+skillInput.addEventListener('blur', () => {
+    if (skillInput.value.trim()) {
+        addSkill(skillInput.value);
+        skillInput.value = '';
+    }
+});
+
 skillsContainer.addEventListener('click', () => {
     skillInput.focus();
 });
 
-// Initialize skills when the page loads
-document.addEventListener('DOMContentLoaded', initializeSkills);
+document.getElementById('add-skill-btn').addEventListener('click', () => {
+    if (skillInput.value.trim()) {
+        addSkill(skillInput.value);
+        skillInput.value = '';
+        skillInput.focus();
+    }
+});
+
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    if (skillInput.value.trim()) {
+        addSkill(skillInput.value);
+        skillInput.value = '';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    initializeSkills();
+});
 </script>
 {% endblock %}
-
-{% endblock %} 
+{% endblock %}

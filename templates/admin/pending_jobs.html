@@ -2,55 +2,171 @@
 
 {% block title %}Công việc chờ duyệt - {{ super() }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .stats-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    .job-card {
+        transition: all 0.2s ease;
+        border-left: 4px solid #ffc107;
+    }
+    .job-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    .company-logo {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
+<div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Công việc chờ duyệt</h2>
-        <a href="{{ url_for('admin_jobs') }}" class="btn btn-secondary">
-            Xem tất cả công việc
+        <div>
+            <h2 class="fw-bold mb-0">Công việc chờ duyệt</h2>
+            <p class="text-muted">Duyệt các công việc đang chờ xét</p>
+        </div>
+        <a href="{{ url_for('admin_jobs') }}" class="btn btn-primary">
+            <i class="fas fa-list me-2"></i>Xem tất cả công việc
         </a>
     </div>
 
     {% include '_messages.html' %}
 
+    <!-- Stats Card -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="stats-card card bg-warning text-white">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-white mb-0">Có {{ jobs|length }} công việc đang chờ duyệt</h5>
+                            <p class="mb-0 text-white text-opacity-75">Các công việc này đang chờ được xét duyệt để hiển thị công khai</p>
+                        </div>
+                        <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                            <i class="fas fa-hourglass-half fa-2x text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% if jobs %}
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Tiêu đề</th>
-                        <th>Người đăng</th>
-                        <th>Ngày đăng</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for job in jobs %}
-                    <tr>
-                        <td>
-                            <a href="{{ url_for('job_detail', job_id=job.id) }}" class="text-decoration-none">
-                                {{ job.title }}
-                            </a>
-                        </td>
-                        <td>{{ job.alumni.name }}</td>
-                        <td>{{ job.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
-                        <td>
-                            <form action="{{ url_for('admin_confirm_job', job_id=job.id) }}" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
-                            </form>
-                            <form action="{{ url_for('admin_delete_job', job_id=job.id) }}" method="POST" class="d-inline" 
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');">
-                                <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="fas fa-hourglass-half me-2 text-warning"></i>Danh sách công việc chờ duyệt</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Công việc</th>
+                                <th>Người đăng</th>
+                                <th>Ngày đăng</th>
+                                <th class="text-end pe-4">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in jobs %}
+                            <tr class="job-card">
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        {% if job.company_logo %}
+                                            <img src="{{ url_for('static', filename='uploads/company_logos/' + job.company_logo) }}" 
+                                                alt="{{ job.company_name }}" class="company-logo me-3">
+                                        {% else %}
+                                            <div class="company-logo me-3">
+                                                {{ job.company_name[:1].upper() }}
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <a href="{{ url_for('job_detail', job_id=job.id) }}" class="text-decoration-none">
+                                                <h6 class="fw-bold mb-0">{{ job.title }}</h6>
+                                            </a>
+                                            <div class="text-muted small">{{ job.company_name }}</div>
+                                            <div class="mt-1">
+                                                <span class="badge bg-light text-dark me-1">
+                                                    <i class="fas fa-map-marker-alt me-1 text-danger"></i>{{ job.location }}
+                                                </span>
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="fas fa-code me-1 text-primary"></i>{{ job.job_type }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if job.alumni.profile and job.alumni.profile.avatar %}
+                                            <img src="{{ url_for('static', filename='uploads/avatars/' + job.alumni.profile.avatar) }}" 
+                                                alt="{{ job.alumni.name }}" class="rounded-circle me-2" width="32" height="32">
+                                        {% else %}
+                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" 
+                                                style="width:32px;height:32px;font-size:12px;">
+                                                {{ job.alumni.name[:1].upper() }}
+                                            </div>
+                                        {% endif %}
+                                        {{ job.alumni.name }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <i class="far fa-clock me-1 text-muted"></i>
+                                    {{ job.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-eye me-1"></i>Xem
+                                    </a>
+                                    <form action="{{ url_for('admin_confirm_job', job_id=job.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success me-1">
+                                            <i class="fas fa-check me-1"></i>Duyệt
+                                        </button>
+                                    </form>
+                                    <form action="{{ url_for('admin_delete_job', job_id=job.id) }}" method="POST" class="d-inline" 
+                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash-alt me-1"></i>Xóa
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     {% else %}
-        <div class="alert alert-success">
-            Không có công việc nào đang chờ duyệt.
+        <div class="card shadow-sm border-0">
+            <div class="card-body py-5">
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h4 class="mb-3">Không có công việc nào đang chờ duyệt</h4>
+                    <p class="text-muted">Tất cả công việc đã được duyệt hoặc xóa</p>
+                    <a href="{{ url_for('admin_jobs') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-list me-2"></i>Xem tất cả công việc
+                    </a>
+                </div>
+            </div>
         </div>
     {% endif %}
 </div>

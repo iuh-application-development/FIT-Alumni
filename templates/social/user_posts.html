@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+
+{% block title %}Bài viết của tôi - FIT Alumni{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-image: url('https://ptckt.iuh.edu.vn/upload/images/IUH2.jpg');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    .container {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header {
+        padding: 20px;
+        background: linear-gradient(to right, #4a89dc, #5a9ae0);
+        border-radius: 12px;
+        margin-bottom: 30px;
+        color: white;
+        box-shadow: 0 4px 12px rgba(74, 137, 220, 0.3);
+    }
+
+    .post-card {
+        border-radius: 12px;
+        overflow: hidden;
+        background-color: #ffffff;
+        border-left: 4px solid #4a89dc;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 25px;
+    }
+    
+    .post-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        border-left: 4px solid #3a70b5;
+    }
+
+    .post-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        background: linear-gradient(to right, #f8f9fa, #ffffff);
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .post-author {
+        display: flex;
+        align-items: center;
+    }
+
+    .avatar {
+        width: 48px;
+        height: 48px;
+        border: 3px solid #4a89dc;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    
+    .avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .post-content {
+        padding: 20px;
+        background-color: #ffffff;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .post-footer {
+        padding: 12px 20px;
+        border-top: 1px solid #f0f0f0;
+        background: linear-gradient(to right, #f8f9fa, #f0f4f8);
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .post-image {
+        max-width: 100%;
+        border-radius: 8px;
+        margin: 10px 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .post-actions .btn {
+        border-radius: 25px;
+        padding: 8px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-right: 10px;
+    }
+
+    .btn-edit {
+        background: linear-gradient(to right, #4a89dc, #5a9ae0);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 10px rgba(74, 137, 220, 0.3);
+    }
+
+    .btn-edit:hover {
+        background: linear-gradient(to right, #3a70b5, #4a89dc);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(74, 137, 220, 0.4);
+    }
+
+    .btn-delete {
+        background: linear-gradient(to right, #dc3545, #e35d6a);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(to right, #c82333, #dc3545);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-back {
+        background: linear-gradient(to right, #6c757d, #868e96);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background: linear-gradient(to right, #5a6268, #6c757d);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(108, 117, 125, 0.4);
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid #4a89dc;
+        margin-bottom: 25px;
+    }
+
+    .stats-card h5 {
+        color: #4a89dc;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .stats-card .stat-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .stats-card .stat-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(to right, #4a89dc, #5a9ae0);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin-right: 15px;
+        box-shadow: 0 4px 10px rgba(74, 137, 220, 0.3);
+    }
+
+    .stats-card .stat-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .stats-card .stat-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #4a89dc;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h4 {
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 25px;
+    }
+
+    .empty-state .btn {
+        background: linear-gradient(to right, #4a89dc, #5a9ae0);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 10px rgba(74, 137, 220, 0.3);
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .empty-state .btn:hover {
+        background: linear-gradient(to right, #3a70b5, #4a89dc);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(74, 137, 220, 0.4);
+    }
+
+    /* Animation for new content */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="page-header fade-in">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0"><i class="fas fa-file-alt me-3"></i>Bài viết của tôi</h2>
+            <a href="{{ url_for('social_feed') }}" class="btn btn-back">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại bảng tin
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            {% if user_posts %}
+                {% for post in user_posts %}
+                <div class="card post-card fade-in">
+                    <div class="post-header">
+                        <div class="post-author">
+                            {% if post.author.profile and post.author.profile.avatar %}
+                            <img src="{{ url_for('static', filename='uploads/avatars/' + post.author.profile.avatar) }}" class="me-3 avatar" alt="{{ post.author.name }}">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" class="me-3 avatar" alt="Default Avatar">
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-0 fw-bold">{{ post.author.name }}</h5>
+                                <small class="text-muted"><i class="far fa-clock me-1"></i>{{ post.local_time.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="post-options-dropdown">
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm rounded-circle" type="button" id="postOptions{{ post.id }}" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="postOptions{{ post.id }}" style="border-radius: 8px; border: none; min-width: 180px;">
+                                    <li><a class="dropdown-item py-2" href="{{ url_for('edit_post', post_id=post.id) }}"><i class="fas fa-edit me-2 text-primary"></i>Chỉnh sửa</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><button type="button" class="dropdown-item py-2 text-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}"><i class="fas fa-trash-alt me-2"></i>Xóa</button></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-content">
+                        <p class="card-text">{{ post.content }}</p>
+
+                        {% if post.image_url %}
+                            {% if post.image_url.startswith('http') %}
+                            <!-- External image URL -->
+                            <img src="{{ post.image_url }}" class="img-fluid post-image rounded" alt="{{ post.content|truncate(20) }}">
+                            {% else %}
+                            <!-- Local uploaded image -->
+                            <img src="{{ url_for('static', filename=post.image_url) }}" class="img-fluid post-image rounded" alt="{{ post.content|truncate(20) }}">
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <div class="post-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="me-3"><i class="far fa-heart me-1"></i>{{ post.likers.all()|length }} lượt thích</span>
+                                <span><i class="far fa-comment me-1"></i>{{ post.comments|length }} bình luận</span>
+                            </div>
+                            <div class="post-actions">
+                                <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn btn-edit">
+                                    <i class="fas fa-edit me-2"></i>Chỉnh sửa
+                                </a>
+                                <button type="button" class="btn btn-delete" data-bs-toggle="modal" data-bs-target="#deletePostModal{{ post.id }}">
+                                    <i class="fas fa-trash-alt me-2"></i>Xóa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <h4>Bạn chưa có bài viết nào</h4>
+                    <p>Hãy chia sẻ suy nghĩ, hình ảnh hoặc thông tin với cộng đồng FIT Alumni.</p>
+                    <a href="{{ url_for('social_feed') }}" class="btn">
+                        <i class="fas fa-plus me-2"></i>Tạo bài viết mới
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="stats-card fade-in">
+                <h5><i class="fas fa-chart-bar me-2"></i>Thống kê bài viết</h5>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">{{ user_posts|length }}</div>
+                        <div class="stat-label">Tổng số bài viết</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">{{ total_likes }}</div>
+                        <div class="stat-label">Lượt thích nhận được</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-comment"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">{{ total_comments }}</div>
+                        <div class="stat-label">Bình luận nhận được</div>
+                    </div>
+                </div>
+                {% if most_liked_post %}
+                <hr>
+                <h6 class="mb-3">Bài viết được yêu thích nhất</h6>
+                <div class="most-liked-post">
+                    <p class="mb-2 text-truncate">{{ most_liked_post.content|truncate(100) }}</p>
+                    <small class="text-muted"><i class="fas fa-heart me-1 text-danger"></i>{{ most_liked_post.likers.all()|length }} lượt thích</small>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-header" style="background: linear-gradient(to right, #4a89dc, #5a9ae0); color: white;">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Mẹo hay</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Thêm hình ảnh để làm bài viết sinh động hơn
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Viết nội dung ngắn gọn, dễ hiểu
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Tương tác với bài viết của người khác
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Cập nhật thông tin thường xuyên
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Post Modals -->
+{% for post in user_posts %}
+<!-- Delete Post Modal for post {{ post.id }} -->
+<div class="modal fade" id="deletePostModal{{ post.id }}" tabindex="-1" aria-labelledby="deletePostModalLabel{{ post.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deletePostModalLabel{{ post.id }}"><i class="fas fa-exclamation-triangle me-2"></i>Xác nhận xóa bài viết</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>Tất cả bình luận liên quan đến bài viết này cũng sẽ bị xóa.
+                </div>
+                <form id="delete-post-form-{{ post.id }}" action="{{ url_for('delete_social_post', post_id=post.id) }}" method="POST">
+                    <!-- No CSRF token needed as Flask-WTF handles it globally -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger delete-post-confirm" data-post-id="{{ post.id }}">
+                    <i class="fas fa-trash-alt me-2"></i>Xóa bài viết
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle delete post confirmation
+        const deleteButtons = document.querySelectorAll('.delete-post-confirm');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const postId = this.getAttribute('data-post-id');
+                const form = document.getElementById('delete-post-form-' + postId);
+                form.submit();
+            });
+        });
+    });
+</script>
+{% endblock %}

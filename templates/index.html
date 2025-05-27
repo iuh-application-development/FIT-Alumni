@@ -3,7 +3,6 @@
 {% block title %}Trang chủ - Cựu sinh viên IUH{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
 <div class="hero-section position-relative mb-5">
     <div class="hero-background"></div>
     <div class="hero-content position-relative">
@@ -21,99 +20,317 @@
     </div>
 </div>
 
-<!-- Main Content -->
 <div class="container">
-    <!-- Features Section -->
     <div class="section mb-5">
+        <h2 class="text-center mb-4 section-header">Các chức năng chính</h2>
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-hover feature-card animate__animated animate__fadeInUp">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-briefcase fa-2x text-primary"></i>
+                <a href="{{ url_for('jobs') }}" class="feature-link">
+                    <div class="feature-card-container">
+                        <div class="card h-100 border-0 shadow-hover feature-card">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon mb-3">
+                                    <i class="fas fa-briefcase fa-2x text-primary"></i>
+                                </div>
+                                <h3 class="card-title h4 mb-3">Việc làm đang tuyển</h3>
+                                <p class="card-text">Khám phá các cơ hội việc làm mới nhất từ các công ty hàng đầu.</p>
+                            </div>
+                            <div class="card-footer bg-danger"></div>
                         </div>
-                        <h3 class="card-title h4 mb-3">Việc làm đang tuyển</h3>
-                        <p class="card-text">Khám phá các cơ hội việc làm mới nhất từ các công ty hàng đầu.</p>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-hover feature-card animate__animated animate__fadeInUp animate__delay-1s">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-users fa-2x text-primary"></i>
+                <a href="{{ url_for('social_feed') }}" class="feature-link">
+                    <div class="feature-card-container">
+                        <div class="card h-100 border-0 shadow-hover feature-card">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon mb-3">
+                                    <i class="fas fa-users fa-2x text-primary"></i>
+                                </div>
+                                <h3 class="card-title h4 mb-3">Cựu sinh viên</h3>
+                                <p class="card-text">Kết nối với cộng đồng cựu sinh viên IUH, chia sẻ kinh nghiệm và cơ hội.</p>
+                            </div>
+                            <div class="card-footer bg-primary"></div>
                         </div>
-                        <h3 class="card-title h4 mb-3">Cựu sinh viên</h3>
-                        <p class="card-text">Kết nối với cộng đồng cựu sinh viên IUH, chia sẻ kinh nghiệm và cơ hội.</p>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-hover feature-card animate__animated animate__fadeInUp animate__delay-2s">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-building fa-2x text-primary"></i>
+                <a href="#partner-companies" class="feature-link">
+                    <div class="feature-card-container">
+                        <div class="card h-100 border-0 shadow-hover feature-card">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon mb-3">
+                                    <i class="fas fa-building fa-2x text-primary"></i>
+                                </div>
+                                <h3 class="card-title h4 mb-3">Doanh nghiệp đối tác</h3>
+                                <p class="card-text">Hợp tác với các doanh nghiệp uy tín để mang đến cơ hội việc làm chất lượng.</p>
+                            </div>
+                            <div class="card-footer bg-danger"></div>
                         </div>
-                        <h3 class="card-title h4 mb-3">Doanh nghiệp đối tác</h3>
-                        <p class="card-text">Hợp tác với các doanh nghiệp uy tín để mang đến cơ hội việc làm chất lượng.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thành tựu trường -->
+    <div class="section py-5 mb-5 bg-light" style="border-radius: 15px;">
+        <div class="container">
+            <div class="section-header text-center position-relative mb-5" data-aos="fade-up">
+                <span class="section-subtitle d-inline-block">THÀNH TỰU VÀ PHÁT TRIỂN</span>
+                <h2 class="section-title">THÀNH TỰU NỔI BẬT</h2>
+                <div class="section-icon"><i class="fas fa-trophy"></i></div>
+                <div class="section-decoration">
+                    <span class="dot"></span>
+                    <span class="line"></span>
+                    <span class="dot"></span>
+                </div>
+                <div class="section-description mx-auto">
+                    <p>Những thành tựu nổi bật của Trường Đại học Công nghiệp TP. Hồ Chí Minh trong suốt quá trình phát triển.</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card achievement-card h-100" data-aos="fade-right">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="achievement-icon me-3">
+                                    <i class="fas fa-award"></i>
+                                </div>
+                                <h4 class="card-title mb-0">Kiểm định chất lượng</h4>
+                            </div>
+                            <p class="card-text">Trường Đại học Công nghiệp Thành phố Hồ Chí Minh đã được công nhận đạt chuẩn kiểm định chất lượng cơ sở giáo dục đại học. Nhiều chương trình đào tạo đã được kiểm định theo tiêu chuẩn AUN-QA và ABET.</p>
+                            <div class="achievement-stats">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <h5 class="mb-0 counter">100%</h5>
+                                            <small>Chương trình đạt chuẩn</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <h5 class="mb-0 counter">20+</h5>
+                                            <small>Năm kinh nghiệm</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card achievement-card h-100" data-aos="fade-left">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="achievement-icon me-3">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <h4 class="card-title mb-0">Đào tạo xuất sắc</h4>
+                            </div>
+                            <p class="card-text">Trường hiện đang đào tạo đa ngành, đa lĩnh vực, đa cấp độ với 11 Khoa chuyên môn và 3 Viện nghiên cứu. Mỗi năm, trường đào tạo và cung cấp cho xã hội hàng ngàn kỹ sư, cử nhân có chất lượng cao.</p>
+                            <div class="achievement-stats">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <h5 class="mb-0 counter">100,000+</h5>
+                                            <small>Sinh viên tốt nghiệp</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <h5 class="mb-0 counter">30+</h5>
+                                            <small>Ngành đào tạo</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card achievement-card h-100" data-aos="fade-right" data-aos-delay="100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="achievement-icon me-3">
+                                    <i class="fas fa-flask"></i>
+                                </div>
+                                <h4 class="card-title mb-0">Nghiên cứu và phát triển</h4>
+                            </div>
+                            <p class="card-text">Trường đã và đang triển khai nhiều đề tài nghiên cứu khoa học các cấp, bao gồm cấp Nhà nước, cấp Bộ, cấp Thành phố và cấp cơ sở. Nhiều kết quả nghiên cứu đã được ứng dụng trong thực tiễn.</p>
+                            <div class="achievement-stats">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <h5 class="mb-0 counter">500+</h5>
+                                            <small>Đề tài nghiên cứu</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <h5 class="mb-0 counter">300+</h5>
+                                            <small>Bài báo khoa học</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card achievement-card h-100" data-aos="fade-left" data-aos-delay="100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="achievement-icon me-3">
+                                    <i class="fas fa-globe-asia"></i>
+                                </div>
+                                <h4 class="card-title mb-0">Hợp tác quốc tế</h4>
+                            </div>
+                            <p class="card-text">Trường đã thiết lập quan hệ hợp tác với nhiều trường đại học, viện nghiên cứu và doanh nghiệp trên thế giới. Đây là cơ hội để sinh viên tham gia các chương trình trao đổi và học tập nâng cao.</p>
+                            <div class="achievement-stats">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <h5 class="mb-0 counter">50+</h5>
+                                            <small>Quốc gia đối tác</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <h5 class="mb-0 counter">100+</h5>
+                                            <small>Đối tác quốc tế</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Latest Jobs Section -->
-    <div class="section mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="h3 mb-0 section-title">Việc làm mới nhất</h2>
-            <a href="{{ url_for('jobs') }}" class="btn btn-outline-primary">
-                Xem tất cả <i class="fas fa-arrow-right ms-2"></i>
-            </a>
-        </div>
-        <div class="row g-4">
-            {% for job in latest_jobs %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-hover job-card animate__animated animate__fadeInUp" style="animation-delay: {{ loop.index0 * 0.2 }}s">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            {% if job.company_logo %}
-                            <img src="{{ job.company_logo }}" alt="{{ job.company_name }}" class="company-logo me-3">
-                            {% else %}
-                            <div class="company-logo-placeholder me-3">
-                                <i class="fas fa-building"></i>
-                            </div>
-                            {% endif %}
-                            <div>
-                                <h3 class="h5 card-title mb-1">{{ job.title }}</h3>
-                                <p class="company-name mb-0">{{ job.company_name }}</p>
-                            </div>
+    <!-- Đối tác tiêu biểu section -->
+    <div id="partner-companies" class="section py-5 partners-section">
+        <div class="container">
+            <div class="section-header text-center position-relative mb-5" data-aos="fade-up">
+                <span class="section-subtitle d-inline-block">NHÀ TÀI TRỢ VÀ ĐỐI TÁC</span>
+                <h2 class="section-title">ĐỐI TÁC TIÊU BIỂU</h2>
+                <div class="section-icon"><i class="fas fa-handshake"></i></div>
+                <div class="section-decoration">
+                    <span class="dot"></span>
+                    <span class="line"></span>
+                    <span class="dot"></span>
+                </div>
+                <div class="section-description mx-auto">
+                    <p>Hợp tác với các doanh nghiệp hàng đầu để mang đến cơ hội việc làm và phát triển cho sinh viên IUH.</p>
+                </div>
+            </div>
+
+            <div class="partner-logos">
+                <!-- Row 1 -->
+                <div class="row justify-content-center align-items-center mb-5">
+                    <div class="col-md-2 col-sm-4 col-6 mb-4 mb-md-0">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="100">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/files/logo-nam-a-bank-moi-16721510943481622227549.png" alt="Nam A Bank" class="img-fluid">
                         </div>
-                        <div class="job-info mb-3">
-                            <p class="mb-2">
-                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                                {{ job.location }}
-                            </p>
-                            <p class="mb-2">
-                                <i class="fas fa-money-bill-wave text-primary me-2"></i>
-                                {{ job.salary_display }}
-                            </p>
-                            <p class="mb-0">
-                                <i class="fas fa-clock text-primary me-2"></i>
-                                {{ job.type }}
-                            </p>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-4 mb-md-0">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="200">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/images/tma.png" alt="TMA Innovation" class="img-fluid">
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-primary btn-apply">
-                                Ứng tuyển ngay
-                            </a>
-                            <small class="text-muted">
-                                {{ job.created_at.strftime('%d/%m/%Y') }}
-                            </small>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-4 mb-md-0">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="300">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/images/dai%20ichi(1).png" alt="Dai-ichi Life" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-4 mb-md-0">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="400">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/images/vp%20bank.png" alt="VPBank" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-4 mb-md-0">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="500">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/images/viettel%20contrusion.png" alt="Viettel Construction" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="row justify-content-center align-items-center mb-5">
+                    <div class="col-md-2 col-sm-4 col-6 mb-4 mb-md-0">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="100">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/images/sacombank.png" alt="Sacombank" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-4 mb-md-0">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="200">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/images/HOA%20PHAT.png" alt="Hòa Phát" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-4 mb-md-0">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="300">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/images/FPT.png" alt="FPT" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-4 mb-md-0">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="400">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/images/p%26g.png" alt="P&G" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-4 mb-md-0">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="500">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/images/misa.png" alt="MISA" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3 - Centered -->
+                <div class="row justify-content-center align-items-center">
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="partner-logo-wrapper" data-aos="zoom-in" data-aos-delay="100">
+                            <img src="https://cuusinhvien.iuh.edu.vn/upload/images/hyosung.png" alt="Hyosung" class="img-fluid">
                         </div>
                     </div>
                 </div>
             </div>
-            {% endfor %}
+
+            <!-- Partner statistics -->
+            <div class="row mt-5 pt-4">
+                <div class="col-md-8 mx-auto">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card partner-stat-card h-100" data-aos="fade-right">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-building display-4 text-primary mb-3"></i>
+                                    <h3 class="counter-value fw-bold mb-2">200</h3>
+                                    <h5 class="fw-light">Đối tác trong nước</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card partner-stat-card h-100" data-aos="fade-left">
+                                <div class="card-body text-center py-4">
+                                    <i class="fas fa-globe-asia display-4 text-primary mb-3"></i>
+                                    <h3 class="counter-value fw-bold mb-2">50</h3>
+                                    <h5 class="fw-light">Đối tác quốc tế</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to action -->
+            <div class="text-center mt-5" data-aos="fade-up">
+                <a href="#contact" class="btn btn-primary btn-lg px-5 py-3">
+                    <i class="fas fa-handshake me-2"></i>Hợp tác với chúng tôi
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -135,8 +352,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(rgba(13, 110, 253, 0.3), rgba(13, 110, 253, 0.4)), 
-                url("{{ url_for('static', filename='images/graduation.jpg') }}") center/cover no-repeat;
+    background: linear-gradient(rgba(13, 110, 253, 0.3), rgba(13, 110, 253, 0.4)),
+                url("https://cdn.tapchitoaan.vn/media/images/ad(1).jpg") center/cover no-repeat;
     filter: brightness(1);
     transform: scale(1.1);
     animation: zoomBackground 20s infinite alternate;
@@ -146,9 +363,9 @@
     position: relative;
     z-index: 2;
     height: 100%;
-    background: linear-gradient(90deg, 
-        rgba(0, 0, 0, 0.6) 0%, 
-        rgba(0, 0, 0, 0.4) 50%, 
+    background: linear-gradient(90deg,
+        rgba(0, 0, 0, 0.6) 0%,
+        rgba(0, 0, 0, 0.4) 50%,
         rgba(0, 0, 0, 0.2) 100%
     );
 }
@@ -171,133 +388,177 @@
     opacity: 0.95;
 }
 
-/* Feature Cards */
-.feature-card {
-    transition: all 0.3s ease;
-    border-radius: 15px;
-    overflow: hidden;
-    background: #ffffff;
+/* Section Header */
+.section-header {
+    padding-bottom: 30px;
+    margin-bottom: 40px;
 }
 
-.shadow-hover {
-    transition: all 0.3s ease;
-}
-
-.shadow-hover:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
-}
-
-.feature-icon {
-    width: 80px;
-    height: 80px;
-    background-color: rgba(13, 110, 253, 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    transition: all 0.3s ease;
-}
-
-.feature-card:hover .feature-icon {
-    transform: scale(1.1) rotate(5deg);
-    background-color: rgba(13, 110, 253, 0.2);
-}
-
-/* Job Cards */
-.job-card {
-    border-radius: 15px;
-    transition: all 0.3s ease;
-}
-
-.company-logo {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-    border-radius: 12px;
-    background-color: #f8f9fa;
-    padding: 8px;
-    transition: all 0.3s ease;
-}
-
-.company-logo-placeholder {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: #6c757d;
-    transition: all 0.3s ease;
-}
-
-.job-card:hover .company-logo,
-.job-card:hover .company-logo-placeholder {
-    transform: scale(1.1);
-}
-
-.company-name {
-    color: #6c757d;
-    font-size: 0.95rem;
-    font-weight: 500;
-}
-
-.job-info {
-    font-size: 0.95rem;
-    color: #495057;
-}
-
-.job-info i {
-    width: 20px;
+.section-subtitle {
+    font-size: 14px;
+    font-weight: 700;
     color: #0d6efd;
-}
-
-/* Buttons */
-.btn-apply {
-    padding: 0.6rem 1.5rem;
-    font-weight: 600;
-    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    background-color: rgba(13, 110, 253, 0.1);
+    padding: 8px 16px;
+    border-radius: 30px;
+    margin-bottom: 15px;
+    position: relative;
+    display: inline-block;
+    box-shadow: 0 3px 10px rgba(13, 110, 253, 0.1);
+    transform: translateY(0);
     transition: all 0.3s ease;
 }
 
-.btn-apply:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
-}
-
-.btn-outline-primary {
-    border-width: 2px;
-    font-weight: 600;
-    padding: 0.6rem 1.5rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.btn-outline-primary:hover {
-    transform: translateY(-2px);
+.section-header:hover .section-subtitle {
+    transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2);
 }
 
-/* Section Title */
 .section-title {
-    font-weight: 700;
-    color: #212529;
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 10px;
     position: relative;
-    padding-bottom: 0.5rem;
+    padding-bottom: 15px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(to right, #333, #555);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: all 0.3s ease;
 }
 
-.section-title::after {
+.section-header:hover .section-title {
+    background: linear-gradient(to right, #0d6efd, #5a9ae0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.section-icon {
+    font-size: 20px;
+    color: white;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0d6efd, #5a9ae0);
+    margin: 15px auto;
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.section-header:hover .section-icon {
+    transform: rotate(360deg);
+    background-color: #0d6efd;
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+}
+
+/* Partners Section Styles */
+.partners-section {
+    background-color: #f8f9fa;
+    position: relative;
+}
+
+.partners-section::before {
     content: '';
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
-    width: 50px;
-    height: 3px;
-    background-color: #0d6efd;
-    border-radius: 2px;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48ZyBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDUiPjxwYXRoIGQ9Ik0zNiAzMGE2IDYgMCAxIDAgMTIgMCA2IDYgMCAxIDAgLTEyIDBNMTggMzBhNiA2IDAgMSAwIDEyIDAgNiA2IDAgMSAwIC0xMiAwTTAgMzBhNiA2IDAgMSAwIDEyIDAgNiA2IDAgMSAwIC0xMiAwTTMwIDQ4YTYgNiAwIDEgMCAxMiAwIDYgNiAwIDEgMCAtMTIgME0xMiA0OGE2IDYgMCAxIDAgMTIgMCA2IDYgMCAxIDAgLTEyIDBNNDIgNDhhNiA2IDAgMSAwIDEyIDAgNiA2IDAgMSAwIC0xMiAwTTMwIDEyYTYgNiAwIDEgMCAxMiAwIDYgNiAwIDEgMCAtMTIgME0xMiAxMmE2IDYgMCAxIDAgMTIgMCA2IDYgMCAxIDAgLTEyIDBNNDIgMTJhNiA2IDAgMSAwIDEyIDAgNiA2IDAgMSAwIC0xMiAwIj48L3BhdGg+PC9nPjwvc3ZnPg==');
+    background-size: 60px 60px;
+    opacity: 0.05;
+    z-index: 0;
+}
+
+.partner-logo-wrapper {
+    height: 100px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.partner-logo-wrapper:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+}
+
+.partner-logo-wrapper img {
+    max-height: 70px;
+    max-width: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.partner-logo-wrapper:hover img {
+    transform: scale(1.05);
+}
+
+.partner-stat-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.partner-stat-card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transform: translateY(-5px);
+}
+
+.counter-value {
+    font-size: 3rem;
+    color: #2c3e50;
+}
+
+/* Animation styles */
+.subtitle-animation, 
+.title-animation, 
+.desc-animation {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.subtitle-animation.aos-animate, 
+.title-animation.aos-animate, 
+.desc-animation.aos-animate {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.subtitle-animation {
+    animation: fadeUpIn 0.6s ease forwards;
+}
+
+.title-animation {
+    animation: fadeUpIn 0.6s 0.2s ease forwards;
+}
+
+.desc-animation {
+    animation: fadeUpIn 0.6s 0.4s ease forwards;
+}
+
+@keyframes fadeUpIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Animations */
@@ -310,32 +571,179 @@
     }
 }
 
-/* Responsive */
-@media (max-width: 992px) {
-    .hero-title {
-        font-size: 2.8rem;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .partner-logo-wrapper {
+        height: 80px;
+        margin-bottom: 15px;
     }
     
-    .hero-text {
-        font-size: 1.2rem;
+    .partner-logo-wrapper img {
+        max-height: 50px;
+    }
+    
+    .counter-value {
+        font-size: 2.5rem;
     }
 }
 
-@media (max-width: 768px) {
-    .hero-title {
-        font-size: 2.3rem;
-    }
-    
-    .hero-text {
-        font-size: 1.1rem;
-    }
-    
-    .job-card {
-        margin-bottom: 1rem;
-    }
+/* Achievement Section Styles */
+.achievement-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    background: white;
+    overflow: hidden;
+}
+
+.achievement-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.achievement-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0d6efd, #5a9ae0);
+    color: white;
+    border-radius: 12px;
+    font-size: 24px;
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2);
+    transition: all 0.3s ease;
+}
+
+.achievement-card:hover .achievement-icon {
+    transform: rotate(10deg);
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+}
+
+.achievement-stats {
+    margin-top: 15px;
+}
+
+.achievement-stats .counter {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.achievement-stats small {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.section-decoration {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    max-width: 200px;
+}
+
+
+.section-decoration .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #0d6efd;
+    display: inline-block;
+}
+
+.section-decoration .line {
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(to right, #0d6efd, #5a9ae0, #0d6efd);
+    margin: 0 10px;
+    display: inline-block;
+}
+
+.section-description {
+    max-width: 700px;
+    margin: 0 auto;
+    color: #6c757d;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    transition: all 0.3s ease;
 }
 </style>
 
-<!-- Add Animate.css -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-{% endblock %} 
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80, // Offset to account for fixed headers
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Counter animation for statistics
+        const counterElements = document.querySelectorAll('.counter');
+        
+        const startCounting = (el) => {
+            const target = parseInt(el.textContent.replace(/\+|\%/g, ''), 10);
+            const suffix = el.textContent.match(/\+|\%/) ? el.textContent.match(/\+|\%/)[0] : '';
+            const duration = 2000; // ms
+            const stepTime = 50; // ms
+            const steps = duration / stepTime;
+            const increment = target / steps;
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                el.textContent = Math.round(current) + suffix;
+                
+                if (current >= target) {
+                    el.textContent = target + suffix;
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        };
+        
+        // Initialize Intersection Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    startCounting(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        // Observe each counter element
+        counterElements.forEach(counter => {
+            observer.observe(counter);
+        });
+
+        // Initialize AOS animations if available
+        if (typeof AOS !== 'undefined') {
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out',
+                once: true,
+                mirror: false
+            });
+        }
+    });
+</script>
+
+<!-- AOS Animation Library -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+{% endblock %}
+{% endblock %}

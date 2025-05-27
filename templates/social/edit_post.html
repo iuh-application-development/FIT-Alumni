@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}Chỉnh sửa bài viết - FIT Alumni{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-image: url('https://ptckt.iuh.edu.vn/upload/images/IUH2.jpg');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    .container {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    }
+
+    .edit-post-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .edit-post-card .card-header {
+        background: linear-gradient(to right, #4a89dc, #5a9ae0);
+        color: white;
+        border: none;
+        padding: 16px 20px;
+        font-weight: 600;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .edit-post-card .card-body {
+        background-color: #ffffff;
+        padding: 30px;
+    }
+
+    .edit-post-card textarea {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        transition: all 0.3s ease;
+        resize: none;
+        min-height: 120px;
+    }
+
+    .edit-post-card textarea:focus {
+        border-color: #4a89dc;
+        box-shadow: 0 0 0 0.2rem rgba(74, 137, 220, 0.25);
+    }
+
+    .current-image {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 8px;
+        margin-top: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: block;
+        object-fit: contain;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 8px;
+        margin-top: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .current-image-container {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .current-image-container:hover .image-overlay {
+        opacity: 1;
+    }
+
+    .clear-image {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, #4a89dc, #5a9ae0);
+        border-color: #4a89dc;
+        font-weight: 600;
+        border-radius: 25px;
+        padding: 10px 25px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(74, 137, 220, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(to right, #3a70b5, #4a89dc);
+        border-color: #3a70b5;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(74, 137, 220, 0.4);
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        font-weight: 600;
+        border-radius: 25px;
+        padding: 10px 25px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(108, 117, 125, 0.4);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+    }
+
+    .form-text {
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    /* Animation for content */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card edit-post-card fade-in">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Chỉnh sửa bài viết</h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('edit_post', post_id=post.id) }}" method="POST" enctype="multipart/form-data" id="edit-post-form">
+                        <!-- Nội dung bài viết -->
+                        <div class="mb-4">
+                            <label for="content" class="form-label"><i class="fas fa-pen-fancy me-2"></i>Nội dung bài viết</label>
+                            <textarea class="form-control" id="content" name="content" rows="5" required>{{ post.content }}</textarea>
+                        </div>
+                        
+                        <!-- Hiển thị hình ảnh hiện tại nếu có -->
+                        {% if post.image_url %}
+                        <div class="mb-4" id="currentImageContainer">
+                            <label class="form-label" style="color: #4a89dc; font-weight: 500;">
+                                <i class="fas fa-image me-2"></i>Hình ảnh hiện tại
+                                {% if post.image_url.startswith('http') %}(URL){% else %}(Đã tải lên){% endif %}
+                            </label>
+                            <div class="text-center">
+                                <div class="current-image-container">
+                                    {% if post.image_url.startswith('http') %}
+                                    <img src="{{ post.image_url }}" class="current-image" alt="Current image">
+                                    {% else %}
+                                    <img src="{{ url_for('static', filename=post.image_url) }}" class="current-image" alt="Current image">
+                                    {% endif %}
+                                    <div class="image-overlay">
+                                        <span class="badge bg-primary text-white p-2">
+                                            {% if post.image_url.startswith('http') %}Hình ảnh từ URL{% else %}Hình ảnh đã tải lên{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" id="remove_image" name="remove_image" value="true">
+                                <label class="form-check-label" for="remove_image">
+                                    <i class="fas fa-trash-alt text-danger me-1"></i> Xóa hình ảnh hiện tại
+                                </label>
+                                <small class="d-block text-muted mt-1">Nếu bạn chọn tùy chọn này, hình ảnh hiện tại sẽ bị xóa khi bạn lưu thay đổi.</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Phần tải lên hình ảnh mới -->
+                        <div class="mb-4">
+                            <label for="image" class="form-label" style="color: #4a89dc; font-weight: 500;">
+                                <i class="fas fa-upload me-2"></i>{% if post.image_url %}Thay đổi hình ảnh{% else %}Thêm hình ảnh{% endif %}
+                            </label>
+                            
+                            <!-- Tải lên file -->
+                            <div class="input-group mb-2">
+                                <span class="input-group-text" style="background: linear-gradient(to right, #4a89dc, #5a9ae0); color: white;">
+                                    <i class="fas fa-upload"></i>
+                                </span>
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*" style="border-radius: 0 8px 8px 0;">
+                            </div>
+                            
+                            <!-- Hoặc nhập URL -->
+                            <div class="input-group mb-2">
+                                <span class="input-group-text" style="background: linear-gradient(to right, #4a89dc, #5a9ae0); color: white;">
+                                    <i class="fas fa-link"></i>
+                                </span>
+                                <input type="text" name="image_url" id="image_url" class="form-control" 
+                                       placeholder="Hoặc dán đường dẫn ảnh từ internet..." 
+                                       style="border-radius: 0 8px 8px 0;" 
+                                       value="{% if post.image_url and post.image_url.startswith('http') %}{{ post.image_url }}{% endif %}">
+                            </div>
+                            
+                            <!-- Thông báo gợi ý -->
+                            <div class="mt-2 p-2 rounded" style="background-color: rgba(74, 137, 220, 0.1); border-left: 3px solid #4a89dc;">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1 text-primary"></i>
+                                    Bạn có thể tải lên hình ảnh hoặc sử dụng URL. Nếu cả hai được cung cấp, URL sẽ được ưu tiên.
+                                </small>
+                            </div>
+                            
+                            <!-- Xem trước hình ảnh mới -->
+                            <div id="image-preview-container" class="mt-3 text-center" style="display: none;">
+                                <h6 class="mb-2">Xem trước hình ảnh mới</h6>
+                                <div class="position-relative d-inline-block">
+                                    <img id="image-preview" class="img-fluid rounded image-preview" alt="Image preview">
+                                    <button type="button" id="remove-preview" class="clear-image">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Nút điều hướng -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('social_feed') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const imageInput = document.getElementById('image');
+        const imageUrlInput = document.getElementById('image_url');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const removePreviewBtn = document.getElementById('remove-preview');
+        const currentImageContainer = document.getElementById('currentImageContainer');
+        const removeImageCheckbox = document.getElementById('remove_image');
+        
+        // Show preview when file is selected
+        if (imageInput) {
+            imageInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreviewContainer.style.display = 'block';
+                        // Clear image URL input when file is selected
+                        imageUrlInput.value = '';
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+        
+        // Handle image URL input
+        if (imageUrlInput) {
+            imageUrlInput.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    // Clear file input when URL is entered
+                    if (imageInput) imageInput.value = '';
+                    // Hide preview if showing
+                    imagePreviewContainer.style.display = 'none';
+                }
+            });
+        }
+        
+        // Remove preview image
+        if (removePreviewBtn) {
+            removePreviewBtn.addEventListener('click', function() {
+                imageInput.value = '';
+                imagePreviewContainer.style.display = 'none';
+            });
+        }
+        
+        // Handle remove image checkbox
+        if (removeImageCheckbox && currentImageContainer) {
+            removeImageCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Disable file input and URL input when removing image
+                    if (imageInput) imageInput.disabled = true;
+                    if (imageUrlInput) imageUrlInput.disabled = true;
+                    currentImageContainer.classList.add('opacity-50');
+                } else {
+                    // Enable inputs when unchecked
+                    if (imageInput) imageInput.disabled = false;
+                    if (imageUrlInput) imageUrlInput.disabled = false;
+                    currentImageContainer.classList.remove('opacity-50');
+                }
+            });
+        }
+        
+        // Textarea auto-resize
+        const contentTextarea = document.getElementById('content');
+        if (contentTextarea) {
+            contentTextarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            
+            // Trigger initial resize
+            const event = new Event('input');
+            contentTextarea.dispatchEvent(event);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Sự kiện{% endblock %}
+
+{% block content %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row">
+        <!-- Search and Filter Section -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm border-0 rounded-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-search me-2"></i>Tìm kiếm & Lọc</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('events') }}" method="get" id="filter-form">
+                        <div class="mb-3">
+                            <label for="keyword" class="form-label fw-bold">Từ khóa</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="keyword" name="keyword" value="{{ keyword }}" placeholder="Tên sự kiện, địa điểm...">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="location" class="form-label fw-bold">Địa điểm</label>
+                            <input type="text" class="form-control" id="location" name="location" value="{{ location }}" placeholder="Nhập địa điểm...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Thời gian</label>
+                            <div class="form-check">
+                                <input class="form-check-input filter-option" type="radio" name="date" id="all" value="" {% if date_filter == '' %}checked{% endif %}>
+                                <label class="form-check-label" for="all">Tất cả</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input filter-option" type="radio" name="date" id="upcoming" value="upcoming" {% if date_filter == 'upcoming' %}checked{% endif %}>
+                                <label class="form-check-label" for="upcoming">Sắp tới</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input filter-option" type="radio" name="date" id="today" value="today" {% if date_filter == 'today' %}checked{% endif %}>
+                                <label class="form-check-label" for="today">Hôm nay</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input filter-option" type="radio" name="date" id="week" value="week" {% if date_filter == 'week' %}checked{% endif %}>
+                                <label class="form-check-label" for="week">Tuần này</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input filter-option" type="radio" name="date" id="month" value="month" {% if date_filter == 'month' %}checked{% endif %}>
+                                <label class="form-check-label" for="month">Tháng này</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input filter-option" type="radio" name="date" id="past" value="past" {% if date_filter == 'past' %}checked{% endif %}>
+                                <label class="form-check-label" for="past">Đã qua</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="sort" class="form-label fw-bold">Sắp xếp</label>
+                            <select class="form-select filter-option" id="sort" name="sort">
+                                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Mới nhất</option>
+                                <option value="upcoming" {% if sort == 'upcoming' %}selected{% endif %}>Sắp diễn ra gần nhất</option>
+                                <option value="popular" {% if sort == 'popular' %}selected{% endif %}>Phổ biến nhất</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter me-2"></i>Lọc kết quả
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events List Section -->
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Danh sách sự kiện</h5>
+                    <span class="badge bg-light text-dark">{{ events|length }} sự kiện</span>
+                </div>
+                <div class="card-body">
+                    {% if events %}
+                        <div class="row">
+                            {% for event in events %}
+                            <div class="col-md-6 col-xl-4 mb-4">
+                                <div class="card h-100 border-0 shadow-sm hover-card">
+                                    <div class="position-relative">
+                                        {% if event.image %}
+                                        <img src="{{ url_for('uploaded_file', filename='events/' + event.image) }}" alt="{{ event.title }}" class="card-img-top event-img">
+                                        {% else %}
+                                        <img src="{{ url_for('static', filename='img/event-placeholder.jpg') }}" alt="{{ event.title }}" class="card-img-top event-img">
+                                        {% endif %}
+                                        <div class="position-absolute top-0 end-0 m-2">
+                                            {% set now = now or datetime.now(UTC) %}
+                                            {% if event.start_time > now %}
+                                            <span class="badge bg-success">Sắp diễn ra</span>
+                                            {% elif event.end_time and event.end_time > now %}
+                                            <span class="badge bg-warning">Đang diễn ra</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">Đã kết thúc</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title text-truncate fw-bold">{{ event.title }}</h5>
+                                        <div class="mb-2 text-muted">
+                                            <i class="fas fa-calendar-day me-1"></i>
+                                            {{ event.start_time.strftime('%d/%m/%Y %H:%M') }}
+                                        </div>
+                                        <div class="mb-2">
+                                            <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                            {{ event.location }}
+                                        </div>
+                                        <div class="mb-2">
+                                            <i class="fas fa-user me-1 text-primary"></i>
+                                            {{ event.creator.name }}
+                                        </div>
+                                        <p class="card-text text-truncate">{{ event.description }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 pt-0">
+                                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary w-100">
+                                            <i class="fas fa-info-circle me-2"></i>Xem chi tiết
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                            <h4>Không tìm thấy sự kiện nào</h4>
+                            <p class="text-muted">Không có sự kiện nào phù hợp với tiêu chí tìm kiếm của bạn.</p>
+                            <a href="{{ url_for('events') }}" class="btn btn-outline-primary mt-2">
+                                <i class="fas fa-redo me-2"></i>Xem tất cả sự kiện
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form when filter options change
+    document.querySelectorAll('.filter-option').forEach(function(element) {
+        element.addEventListener('change', function() {
+            document.getElementById('filter-form').submit();
+        });
+    });
+});
+</script>
+{% endblock %} 

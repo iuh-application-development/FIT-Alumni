@@ -2,100 +2,280 @@
 
 {% block title %}Việc làm - {{ super() }}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jobs.css') }}">
+{% endblock %} 
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <!-- Search and Filter Section -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ url_for('jobs') }}" class="row g-3">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" class="form-control" name="search" placeholder="Tìm kiếm công việc..." value="{{ request.args.get('search', '') }}">
+<div class="container mt-4">
+    <!-- Modern Job Search Header -->
+    <div class="jobs-header">
+        <div class="jobs-header-overlay"></div>
+        <div class="jobs-header-content text-center">
+            <h1><i class="fas fa-briefcase me-2"></i>Tìm kiếm việc làm</h1>
+            <p>Khám phá cơ hội nghề nghiệp phù hợp với kỹ năng và sở thích của bạn tại các công ty công nghệ hàng đầu</p>
+            
+            <!-- Main Search Bar -->
+            <div class="search-container">
+                <form method="GET" action="{{ url_for('jobs') }}" class="search-form">
+                    <div class="search-main-wrapper">
+                        <div class="search-input-group">
+                            <div class="search-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <input type="text" class="search-input" name="keyword" placeholder="Tìm kiếm công việc, vị trí, công ty..." value="{{ request.args.get('keyword', '') }}">
+                        </div>
+                        <button type="submit" class="search-button">
+                            <i class="fas fa-search me-2"></i>Tìm kiếm
+                        </button>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select" name="job_type">
-                        <option value="">Tất cả loại công việc</option>
-                        <option value="fulltime" {% if request.args.get('job_type') == 'fulltime' %}selected{% endif %}>Toàn thời gian</option>
-                        <option value="parttime" {% if request.args.get('job_type') == 'parttime' %}selected{% endif %}>Bán thời gian</option>
-                        <option value="internship" {% if request.args.get('job_type') == 'internship' %}selected{% endif %}>Thực tập</option>
-                        <option value="contract" {% if request.args.get('job_type') == 'contract' %}selected{% endif %}>Hợp đồng</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select" name="level">
-                        <option value="">Tất cả cấp bậc</option>
-                        <option value="intern" {% if request.args.get('level') == 'intern' %}selected{% endif %}>Thực tập sinh</option>
-                        <option value="fresher" {% if request.args.get('level') == 'fresher' %}selected{% endif %}>Fresher</option>
-                        <option value="junior" {% if request.args.get('level') == 'junior' %}selected{% endif %}>Junior</option>
-                        <option value="middle" {% if request.args.get('level') == 'middle' %}selected{% endif %}>Middle</option>
-                        <option value="senior" {% if request.args.get('level') == 'senior' %}selected{% endif %}>Senior</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-filter me-2"></i>Lọc
-                    </button>
-                </div>
-            </form>
+                    
+                    <!-- Quick Filter Pills -->
+                    <div class="quick-filters">
+                        <div class="location-pills">
+                            <div class="filter-label"><i class="fas fa-map-marker-alt me-2"></i>Thành phố:</div>
+                            <div class="filter-pills-container">
+                                <label class="filter-pill {% if not request.args.get('location') %}active{% endif %}">
+                                    <input type="radio" name="location" value="" {% if not request.args.get('location') %}checked{% endif %}>
+                                    <span>Tất cả</span>
+                                </label>
+                                {% for location in locations %}
+                                <label class="filter-pill {% if request.args.get('location') == location %}active{% endif %}">
+                                    <input type="radio" name="location" value="{{ location }}" {% if request.args.get('location') == location %}checked{% endif %}>
+                                    <span>{{ location }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Advanced Filter Toggle -->
+                        <button type="button" class="advanced-filter-toggle" id="advancedFilterToggle">
+                            <i class="fas fa-sliders-h me-2"></i>Bộ lọc nâng cao
+                        </button>
+                    </div>
+                    
+                    <!-- Advanced Filters Panel (Hidden by default) -->
+                    <div class="advanced-filters" id="advancedFilters">
+                        <div class="filter-grid">
+                            <!-- Loại công việc -->
+                            <div class="filter-group">
+                                <h3 class="filter-group-title"><i class="fas fa-code me-2"></i>Loại công việc</h3>
+                                <div class="filter-options">
+                                    {% for job_type in job_types %}
+                                    <label class="filter-option {% if request.args.get('job_type') == job_type %}active{% endif %}">
+                                        <input type="radio" name="job_type" value="{{ job_type }}" {% if request.args.get('job_type') == job_type %}checked{% endif %}>
+                                        <span>{{ job_type }}</span>
+                                    </label>
+                                    {% endfor %}
+                                    <label class="filter-option {% if not request.args.get('job_type') %}active{% endif %}">
+                                        <input type="radio" name="job_type" value="" {% if not request.args.get('job_type') %}checked{% endif %}>
+                                        <span>Tất cả</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Kinh nghiệm -->
+                            <div class="filter-group">
+                                <h3 class="filter-group-title"><i class="fas fa-user-tie me-2"></i>Kinh nghiệm</h3>
+                                <div class="filter-options">
+                                    {% for level in levels %}
+                                    <label class="filter-option {% if request.args.get('level') == level %}active{% endif %}">
+                                        <input type="radio" name="level" value="{{ level }}" {% if request.args.get('level') == level %}checked{% endif %}>
+                                        <span>{{ level }}</span>
+                                    </label>
+                                    {% endfor %}
+                                    <label class="filter-option {% if not request.args.get('level') %}active{% endif %}">
+                                        <input type="radio" name="level" value="" {% if not request.args.get('level') %}checked{% endif %}>
+                                        <span>Tất cả</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Hình thức làm việc -->
+                            <div class="filter-group">
+                                <h3 class="filter-group-title"><i class="fas fa-briefcase me-2"></i>Hình thức làm việc</h3>
+                                <div class="filter-options">
+                                    {% for work_type in work_types %}
+                                    <label class="filter-option {% if request.args.get('work_type') == work_type %}active{% endif %}">
+                                        <input type="radio" name="work_type" value="{{ work_type }}" {% if request.args.get('work_type') == work_type %}checked{% endif %}>
+                                        <span>{{ work_type }}</span>
+                                    </label>
+                                    {% endfor %}
+                                    <label class="filter-option {% if not request.args.get('work_type') %}active{% endif %}">
+                                        <input type="radio" name="work_type" value="" {% if not request.args.get('work_type') %}checked{% endif %}>
+                                        <span>Tất cả</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Advanced Filter Actions -->
+                        <div class="filter-actions">
+                            <a href="{{ url_for('jobs') }}" class="btn-reset">
+                                <i class="fas fa-sync-alt me-2"></i>Đặt lại bộ lọc
+                            </a>
+                            <button type="submit" class="btn-apply">
+                                <i class="fas fa-filter me-2"></i>Áp dụng bộ lọc
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Active Filters Display -->
+                    {% if request.args.get('location') or request.args.get('job_type') or request.args.get('level') or request.args.get('work_type') %}
+                    <div class="active-filters">
+                        <div class="active-filters-title">Bộ lọc đang áp dụng:</div>
+                        <div class="active-filters-list">
+                            {% if request.args.get('location') %}
+                            <div class="filter-tag">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ request.args.get('location') }}
+                                <a href="{{ url_for('jobs', keyword=request.args.get('keyword', ''), job_type=request.args.get('job_type', ''), level=request.args.get('level', ''), work_type=request.args.get('work_type', ''), sort=request.args.get('sort', '')) }}" class="filter-tag-remove"><i class="fas fa-times"></i></a>
+                            </div>
+                            {% endif %}
+                            
+                            {% if request.args.get('job_type') %}
+                            <div class="filter-tag">
+                                <i class="fas fa-code me-1"></i>{{ request.args.get('job_type') }}
+                                <a href="{{ url_for('jobs', keyword=request.args.get('keyword', ''), location=request.args.get('location', ''), level=request.args.get('level', ''), work_type=request.args.get('work_type', ''), sort=request.args.get('sort', '')) }}" class="filter-tag-remove"><i class="fas fa-times"></i></a>
+                            </div>
+                            {% endif %}
+                            
+                            {% if request.args.get('level') %}
+                            <div class="filter-tag">
+                                <i class="fas fa-user-tie me-1"></i>{{ request.args.get('level') }}
+                                <a href="{{ url_for('jobs', keyword=request.args.get('keyword', ''), location=request.args.get('location', ''), job_type=request.args.get('job_type', ''), work_type=request.args.get('work_type', ''), sort=request.args.get('sort', '')) }}" class="filter-tag-remove"><i class="fas fa-times"></i></a>
+                            </div>
+                            {% endif %}
+                            
+                            {% if request.args.get('work_type') %}
+                            <div class="filter-tag">
+                                <i class="fas fa-briefcase me-1"></i>{{ request.args.get('work_type') }}
+                                <a href="{{ url_for('jobs', keyword=request.args.get('keyword', ''), location=request.args.get('location', ''), job_type=request.args.get('job_type', ''), level=request.args.get('level', ''), sort=request.args.get('sort', '')) }}" class="filter-tag-remove"><i class="fas fa-times"></i></a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Jobs List -->
-    <div class="row">
+    <!-- Jobs List with Advanced Sorting -->
+    <div class="jobs-section-header">
+        <div class="jobs-header-top">
+            <div class="jobs-title-section">
+                <h2>Danh sách việc làm</h2>
+                <div class="jobs-count">{{ jobs|length }} kết quả</div>
+            </div>
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="list" title="Xem dạng danh sách">
+                    <i class="fas fa-list"></i>
+                </button>
+                <button class="view-btn" data-view="grid" title="Xem dạng lưới">
+                    <i class="fas fa-th-large"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="jobs-sorting">
+            <div class="sorting-label">
+                <i class="fas fa-sort me-2"></i>Sắp xếp theo:
+            </div>
+            <div class="sorting-options">
+                <a href="{{ url_for('jobs', sort='newest', keyword=request.args.get('keyword', ''), location=request.args.get('location', ''), job_type=request.args.get('job_type', ''), level=request.args.get('level', ''), work_type=request.args.get('work_type', '')) }}" 
+                   class="sort-option {% if request.args.get('sort') == 'newest' or not request.args.get('sort') %}active{% endif %}">
+                    <i class="fas fa-clock me-1"></i>Mới nhất
+                </a>
+                <a href="{{ url_for('jobs', sort='oldest', keyword=request.args.get('keyword', ''), location=request.args.get('location', ''), job_type=request.args.get('job_type', ''), level=request.args.get('level', ''), work_type=request.args.get('work_type', '')) }}" 
+                   class="sort-option {% if request.args.get('sort') == 'oldest' %}active{% endif %}">
+                    <i class="fas fa-history me-1"></i>Cũ nhất
+                </a>
+                <a href="{{ url_for('jobs', sort='salary-desc', keyword=request.args.get('keyword', ''), location=request.args.get('location', ''), job_type=request.args.get('job_type', ''), level=request.args.get('level', ''), work_type=request.args.get('work_type', '')) }}" 
+                   class="sort-option {% if request.args.get('sort') == 'salary-desc' %}active{% endif %}">
+                    <i class="fas fa-dollar-sign me-1"></i>Lương cao nhất
+                </a>
+                <a href="{{ url_for('jobs', sort='deadline', keyword=request.args.get('keyword', ''), location=request.args.get('location', ''), job_type=request.args.get('job_type', ''), level=request.args.get('level', ''), work_type=request.args.get('work_type', '')) }}" 
+                   class="sort-option {% if request.args.get('sort') == 'deadline' %}active{% endif %}">
+                    <i class="fas fa-calendar-alt me-1"></i>Gần hết hạn
+                </a>
+                <a href="{{ url_for('jobs', sort='company', keyword=request.args.get('keyword', ''), location=request.args.get('location', ''), job_type=request.args.get('job_type', ''), level=request.args.get('level', ''), work_type=request.args.get('work_type', '')) }}" 
+                   class="sort-option {% if request.args.get('sort') == 'company' %}active{% endif %}">
+                    <i class="fas fa-building me-1"></i>Tên công ty
+                </a>
+                <a href="{{ url_for('jobs', sort='location', keyword=request.args.get('keyword', ''), location=request.args.get('location', ''), job_type=request.args.get('job_type', ''), level=request.args.get('level', ''), work_type=request.args.get('work_type', '')) }}" 
+                   class="sort-option {% if request.args.get('sort') == 'location' %}active{% endif %}">
+                    <i class="fas fa-map-marker-alt me-1"></i>Địa điểm
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="job-listings">
         {% if jobs %}
             {% for job in jobs %}
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
+            <div class="job-card">
+                <a href="{{ url_for('job_detail', job_id=job.id) }}" class="job-card-link">
+                    <div class="job-content">
+                        <div class="job-logo">
                             {% if job.company_logo %}
                             <img src="{{ url_for('static', filename='uploads/company_logos/' + job.company_logo) }}" 
-                                 alt="Company logo" class="me-3" style="width: 50px; height: 50px; object-fit: contain;">
+                                 alt="{{ job.company_name }}">
                             {% else %}
-                            <div class="bg-light rounded p-2 me-3">
-                                <i class="fas fa-building fa-2x text-muted"></i>
-                            </div>
+                            <i class="fas fa-building fa-2x text-muted"></i>
                             {% endif %}
-                            <div>
-                                <h5 class="card-title mb-1">{{ job.title }}</h5>
-                                <p class="text-muted mb-0">{{ job.company_name }}</p>
+                        </div>
+                        <div class="job-info">
+                            <h3 class="job-title">{{ job.title }}</h3>
+                            <div class="company-name">{{ job.company_name }}</div>
+                            <div class="job-meta">
+                                <span class="job-location"><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+                                {% if job.job_type %}
+                                <span class="job-tag">{{ job.job_type }}</span>
+                                {% endif %}
+                                {% if job.level %}
+                                <span class="job-tag">{{ job.level }}</span>
+                                {% endif %}
+                                {% if job.headcount %}
+                                <span class="job-tag">{{ job.headcount }} vị trí</span>
+                                {% endif %}
                             </div>
                         </div>
-                        
-                        <div class="d-flex flex-wrap gap-2 mb-3">
-                            <span class="badge bg-primary">{{ job.job_type }}</span>
-                            <span class="badge bg-info">{{ job.level }}</span>
-                            <span class="badge bg-secondary">{{ job.location }}</span>
-                        </div>
-                        
-                        <p class="card-text text-truncate mb-3">{{ job.description | striptags | truncate(100) }}</p>
-                        
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-primary fw-bold">{{ job.salary_range }}</span>
-                            <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-outline-primary btn-sm">
-                                Xem chi tiết
-                            </a>
+                        <div class="job-right">
+                            {% if job.salary_display == 'Thỏa thuận' %}
+                            <div class="job-negotiable"><i class="fas fa-check-circle"></i> Thỏa thuận</div>
+                            {% else %}
+                            <div class="job-salary">{{ job.salary_display }}</div>
+                            {% endif %}
+                            <div class="job-date">Đăng {{ job.created_at.strftime('%d/%m/%Y') }}</div>
                         </div>
                     </div>
-                    <div class="card-footer bg-transparent">
-                        <small class="text-muted">
-                            <i class="fas fa-clock me-1"></i>
-                            Đăng {{ job.created_at.strftime('%d/%m/%Y') }}
-                        </small>
-                    </div>
-                </div>
+                </a>
             </div>
             {% endfor %}
         {% else %}
-            <div class="col-12">
-                <div class="alert alert-info text-center">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Không tìm thấy công việc phù hợp với tiêu chí tìm kiếm.
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Không tìm thấy công việc</h3>
+                <p>Không tìm thấy công việc phù hợp với tiêu chí tìm kiếm của bạn. Vui lòng thử lại với các bộ lọc khác hoặc mở rộng phạm vi tìm kiếm.</p>
+                <div class="empty-state-actions">
+                    <a href="{{ url_for('jobs') }}" class="btn-reset-search">
+                        <i class="fas fa-sync-alt me-2"></i>Xem tất cả công việc
+                    </a>
                 </div>
             </div>
         {% endif %}
+        
+        <!-- Loading Animation -->
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Đang tải công việc...</div>
+            <!-- Các phần tử mới sẽ được thêm vào bằng JavaScript -->
+        </div>
     </div>
 
     <!-- Pagination -->

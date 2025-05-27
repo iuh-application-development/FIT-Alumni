@@ -1,58 +1,129 @@
-# FIT Alumni Portal
+# FIT-Alumni: Hệ Thống Kết Nối Cựu Sinh Viên Khoa CNTT
 
-Cổng thông tin dành cho cựu sinh viên FIT.
+## Giới thiệu tổng quan
 
-## Yêu cầu hệ thống
+**FIT-Alumni** là một hệ thống phần mềm được phát triển với mục tiêu xây dựng cầu nối vững chắc giữa cựu sinh viên và nhà trường. Thông qua nền tảng này, người dùng có thể cập nhật hồ sơ cá nhân, theo dõi vị trí việc làm sau tốt nghiệp, giao lưu và hỗ trợ lẫn nhau trong quá trình phát triển sự nghiệp.
 
-- Python 3.8 hoặc cao hơn
-- pip (Python package installer)
+Hệ thống không chỉ hỗ trợ việc quản lý dữ liệu cựu sinh viên mà còn cung cấp các chức năng thống kê, phân loại theo lĩnh vực công tác, đơn vị công tác, đồng thời tạo ra một diễn đàn mở để trao đổi học thuật, chia sẻ kinh nghiệm làm việc và đăng tin tuyển dụng.
 
-## Cài đặt
+## Thành viên thực hiện dự án
 
-1. Clone repository này về máy local:
-```bash
-git clone https://github.com/iuh-application-development/FIT-Alumni.git
-cd fit-alumini
+| Họ và tên             | Mã số sinh viên  | Vai trò chính                                                | Mức độ hoàn thành  |
+|-----------------------|------------------|--------------------------------------------------------------|--------------------|
+| Nguyễn Phước Điền     | 21002595         | Phát triển chức năng: Trang chủ, đăng bài, việc làm, profile | 100%               |
+| Lê Thị Thúy Kiều      | 22733091         | Giao diện và chức năng quản lý của Admin, auth, báo cáo      | 100%               |
+| Nguyễn Thị Mỹ Duyên   | 22640511         | Thiết kế giao diện, chỉnh sửa HTML/CSS, báo cáo              | 100%               |
+| Lê Hữu Trọng          | 22652671         | Lên ý tưởng thiết kế Slide trình bày và video demo           | 100%               |
+
+## Cấu trúc dự án
+
+```
+FIT-ALUMNI NEW/
+├── __pycache__/
+├── .venv/
+├── instance/
+├── migrations/
+├── static/
+│   ├── css/
+│   ├── images/
+│   ├── img/
+│   ├── js/
+│   └── uploads/
+├── templates/
+│   ├── admin/
+│   ├── alumni/
+│   ├── social/
+│   ├── student/
+│   ├── user/
+│   ├── _messages.html
+│   ├── base.html
+│   ├── edit_profile.html
+│   ├── events.html
+│   ├── index.html
+│   ├── job_detail.html
+│   ├── jobs.html
+│   ├── login.html
+│   ├── profile.html
+│   ├── register.html
+│   └── test_image.html
+├── venv/
+├── .gitignore
+├── alumni.db
+├── app.py
+├── forms.py
+├── models.py
+├── README.md
+└── requirements.txt
 ```
 
-2. Tạo và kích hoạt môi trường ảo (virtual environment):
+## Vai trò người dùng
+
+- **Admin**:
+  - Quản lý tài khoản người dùng và cựu sinh viên.
+  - Duyệt các bài đăng tuyển dụng và hồ sơ ứng tuyển.
+  - Đăng bài, bình luận trên bảng tin nội bộ.
+
+- **Cựu sinh viên**:
+  - Đăng ký/đăng nhập hệ thống.
+  - Đăng bài viết, đăng tin tuyển dụng.
+  - Duyệt các hồ sơ ứng tuyển và hỗ trợ sinh viên hiện đang theo học.
+
+- **Sinh viên hiện tại**:
+  - Đăng bài viết, bình luận, giao lưu trong cộng đồng.
+  - Tìm kiếm, ứng tuyển các vị trí việc làm phù hợp.
+
+## Công nghệ sử dụng
+
+- **Ngôn ngữ backend**: Python (Flask Framework)
+- **Cơ sở dữ liệu**: SQLite
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Giao diện tĩnh**: Thư mục static và templates theo kiến trúc MVC
+
+## Hướng dẫn triển khai hệ thống
+
+### Bước 1: Sao chép mã nguồn về máy local
+```bash
+git clone https://github.com/iuh-application-development/FIT-Alumni.git
+```
+
+### Bước 2: Tạo môi trường ảo và kích hoạt
 ```bash
 python -m venv venv
-# Windows
+
+# Đối với Windows
 .\venv\Scripts\activate
-# Linux/Mac
+
+# Đối với Mac/Linux
 source venv/bin/activate
 ```
 
-3. Cài đặt các thư viện cần thiết:
+### Bước 3: Cài đặt thư viện phụ thuộc
 ```bash
 pip install -r requirements.txt
 ```
 
-## Chạy ứng dụng
-
-1. Đảm bảo bạn đang ở trong môi trường ảo (venv)
-
-2. Chạy ứng dụng:
+### Bước 4: Khởi chạy ứng dụng
 ```bash
 python app.py
 ```
-
-3. Mở trình duyệt web và truy cập:
+Sau đó, mở trình duyệt và truy cập địa chỉ:
 ```
 http://localhost:5000
 ```
 
-## Cấu trúc thư mục
+## Tài liệu và nguồn tham khảo
 
-- `app.py`: File chính chứa mã nguồn ứng dụng Flask
-- `forms.py`: Chứa các form được sử dụng trong ứng dụng
-- `requirements.txt`: Danh sách các thư viện Python cần thiết
-- `static/`: Thư mục chứa các file tĩnh (CSS, JavaScript, hình ảnh)
-- `templates/`: Thư mục chứa các template HTML
-- `migrations/`: Thư mục chứa các file migration của database
-- `alumni.db`: Database SQLite chứa dữ liệu ứng dụng
+1. Phạm Minh Tâm, Lê Thanh Hòa (2021). *Ứng dụng CNTT trong việc kết nối mạng lưới cựu sinh viên* - Hội thảo ICT 2021.
+2. Tran, H.T. & Nguyen, M.H. (2019). *Developing an Alumni Information System Using PHP and MySQL* - IJCA.
+3. Dahri, A.S. et al. (2017). *Design and Development of Alumni Information System* - IJCA.
+4. Roy, S. & Saha, S. (2016). *Web-Based Alumni Information System* - IEEE CSE.
+5. Ngô Văn Tùng (2020). *Ứng dụng hệ thống alumni trong nâng cao chất lượng đào tạo* - Tạp chí Giáo dục.
 
-## Đóng góp
+## Tài nguyên bổ sung
 
-Nếu bạn muốn đóng góp cho dự án, vui lòng tạo pull request hoặc báo cáo issues. 
+- Video demo, báo cáo chi tiết và bản trình chiếu có thể được truy cập tại:  
+🔗 [Google Drive - FIT Alumni Project](https://drive.google.com/drive/folders/1bITDdpy7vZUikldcUwcj6JTNOun3UaFu?usp=drive_link)
+
+---
+
+> *FIT-Alumni không chỉ là một bài tập học thuật, mà còn là nền tảng thực tiễn cho việc áp dụng kỹ năng phát triển phần mềm, tổ chức nhóm và phục vụ cộng đồng sinh viên đại học một cách có trách nhiệm và hiệu quả.*

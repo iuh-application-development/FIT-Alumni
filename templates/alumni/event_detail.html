@@ -4,178 +4,250 @@
 
 {% block content %}
 <div class="container py-4">
-    <!-- Event Header -->
-    <div class="card shadow-sm mb-4 fade-in">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h1 class="h3 mb-2">{{ event.title }}</h1>
-                    <div class="d-flex align-items-center mb-3">
-                        <span class="badge bg-{{ 'success' if event.status == 'active' else 'warning' if event.status == 'upcoming' else 'secondary' }} me-2">
-                            {{ 'Đang diễn ra' if event.status == 'active' else 'Sắp diễn ra' if event.status == 'upcoming' else 'Đã kết thúc' }}
-                        </span>
-                        <small class="text-muted">
-                            <i class="fas fa-calendar-alt me-1"></i>
-                            {{ event.start_time.strftime('%d/%m/%Y %H:%M') }} - {{ event.end_time.strftime('%d/%m/%Y %H:%M') }}
-                        </small>
-                    </div>
-                </div>
-                <div class="btn-group">
-                    <a href="{{ url_for('alumni_edit_event', event_id=event.id) }}" class="btn btn-outline-primary">
-                        <i class="fas fa-edit me-2"></i>Chỉnh sửa
-                    </a>
-                    <button type="button" class="btn btn-outline-danger" onclick="deleteEvent()">
-                        <i class="fas fa-trash me-2"></i>Xóa
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="row">
-        <!-- Main Content -->
         <div class="col-lg-8">
-            <!-- Event Image -->
-            {% if event.image %}
-            <div class="card shadow-sm mb-4 fade-in">
-                <img src="{{ url_for('static', filename='uploads/event_images/' + event.image) }}" 
-                     alt="{{ event.title }}" 
-                     class="card-img-top"
-                     style="height: 400px; object-fit: cover;">
-            </div>
-            {% endif %}
-
-            <!-- Event Description -->
-            <div class="card shadow-sm mb-4 fade-in">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="fas fa-info-circle me-2 text-primary"></i>Mô tả sự kiện
-                    </h5>
-                    <div class="card-text">
-                        {{ event.description|safe }}
-                    </div>
+            <!-- Event Card -->
+            <div class="card border-0 shadow-sm mb-4 fade-in">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>{{ event.title }}</h4>
+                    <span class="badge bg-light text-dark">
+                        {% set now = now or datetime.now(UTC) %}
+                        {% if event.start_time > now %}
+                            <i class="fas fa-clock text-success me-1"></i>Sắp diễn ra
+                        {% elif event.end_time and event.end_time > now %}
+                            <i class="fas fa-clock text-warning me-1"></i>Đang diễn ra
+                        {% else %}
+                            <i class="fas fa-clock text-secondary me-1"></i>Đã kết thúc
+                        {% endif %}
+                    </span>
                 </div>
-            </div>
-
-            <!-- Event Requirements -->
-            {% if event.requirements %}
-            <div class="card shadow-sm mb-4 fade-in">
+                
+                {% if event.image %}
+                <img src="{{ url_for('uploaded_file', filename='events/' + event.image) }}" class="img-fluid" alt="{{ event.title }}">
+                {% else %}
+                <img src="{{ url_for('static', filename='img/event-placeholder.jpg') }}" class="img-fluid" alt="{{ event.title }}">
+                {% endif %}
+                
                 <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="fas fa-list-check me-2 text-primary"></i>Yêu cầu
-                    </h5>
-                    <div class="card-text">
-                        {{ event.requirements|safe }}
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0">
+                                    <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-calendar-day"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0 text-muted">Thời gian bắt đầu</h6>
+                                    <div>{{ event.start_time.strftime('%d/%m/%Y %H:%M') }}</div>
+                                </div>
+                            </div>
+                            
+                            {% if event.end_time %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0">
+                                    <span class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0 text-muted">Thời gian kết thúc</h6>
+                                    <div>{{ event.end_time.strftime('%d/%m/%Y %H:%M') }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0">
+                                    <span class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0 text-muted">Địa điểm</h6>
+                                    <div>{{ event.location }}</div>
+                                </div>
+                            </div>
+                            
+                            {% if event.capacity %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0">
+                                    <span class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-users"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0 text-muted">Sức chứa</h6>
+                                    <div>
+                                        {{ registrations_count }} / {{ event.capacity }} người tham gia
+                                        {% if registrations_count >= event.capacity %}
+                                            <span class="badge bg-danger ms-2">Đã đầy</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Event Contact Info -->
-            {% if event.contact_info %}
-            <div class="card shadow-sm mb-4 fade-in">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="fas fa-address-card me-2 text-primary"></i>Thông tin liên hệ
-                    </h5>
-                    <div class="card-text">
-                        {{ event.contact_info|safe }}
+                    
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2"><i class="fas fa-info-circle me-2 text-primary"></i>Mô tả sự kiện</h5>
+                        <div class="mt-3">
+                            {{ event.description|nl2br }}
+                        </div>
                     </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Event Location -->
-            <div class="card shadow-sm mb-4 fade-in">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="fas fa-map-marker-alt me-2 text-primary"></i>Địa điểm
-                    </h5>
-                    <p class="card-text">{{ event.location }}</p>
-                    {% if event.location %}
-                    <div class="ratio ratio-16x9 mb-3">
-                        <iframe 
-                            src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q={{ event.location|urlencode }}" 
-                            allowfullscreen>
-                        </iframe>
+                    
+                    {% if event.requirements %}
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2"><i class="fas fa-list-ul me-2 text-primary"></i>Yêu cầu tham gia</h5>
+                        <div class="mt-3">
+                            {{ event.requirements|nl2br }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if event.contact_info %}
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2"><i class="fas fa-phone-alt me-2 text-primary"></i>Thông tin liên hệ</h5>
+                        <div class="mt-3">
+                            {{ event.contact_info|nl2br }}
+                        </div>
                     </div>
                     {% endif %}
                 </div>
-            </div>
-
-            <!-- Event Stats -->
-            <div class="card shadow-sm mb-4 fade-in">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="fas fa-chart-bar me-2 text-primary"></i>Thống kê
-                    </h5>
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="text-center">
-                                <h6 class="text-muted mb-1">Sức chứa</h6>
-                                <h4 class="mb-0">{{ event.capacity }}</h4>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <h6 class="text-muted mb-1">Đã đăng ký</h6>
-                                <h4 class="mb-0">{{ event.registrations|length }}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Event Organizer -->
-            <div class="card shadow-sm mb-4 fade-in">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="fas fa-user me-2 text-primary"></i>Người tổ chức
-                    </h5>
-                    <div class="d-flex align-items-center">
-                        {% if event.alumni.avatar %}
-                        <img src="{{ url_for('static', filename='uploads/avatars/' + event.alumni.avatar) }}" 
-                             alt="{{ event.alumni.name }}" 
-                             class="rounded-circle me-3"
-                             style="width: 50px; height: 50px; object-fit: cover;">
+                
+                {% if event.start_time > now %}
+                <div class="card-footer bg-light">
+                    {% if current_user.is_authenticated %}
+                        {% if not user_registered %}
+                            {% if event.capacity and registrations_count >= event.capacity %}
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <i class="fas fa-times-circle me-2"></i>Sự kiện đã đủ người tham gia
+                                </button>
+                            {% else %}
+                                <form action="{{ url_for('register_event', event_id=event.id) }}" method="post">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-check-circle me-2"></i>Đăng ký tham gia
+                                    </button>
+                                </form>
+                            {% endif %}
                         {% else %}
-                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
-                             style="width: 50px; height: 50px;">
-                            <i class="fas fa-user text-muted"></i>
-                        </div>
+                            <div class="alert alert-success mb-3">
+                                <i class="fas fa-check-circle me-2"></i>Bạn đã đăng ký tham gia sự kiện này
+                            </div>
+                            <form action="{{ url_for('cancel_event_registration', event_id=event.id) }}" method="post">
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="fas fa-times-circle me-2"></i>Hủy đăng ký
+                                </button>
+                            </form>
                         {% endif %}
-                        <div>
-                            <h6 class="mb-0">{{ event.alumni.name }}</h6>
-                            <small class="text-muted">{{ event.alumni.email }}</small>
-                        </div>
-                    </div>
+                    {% else %}
+                        <a href="{{ url_for('login', next=url_for('event_detail', event_id=event.id)) }}" class="btn btn-primary w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập để đăng ký tham gia
+                        </a>
+                    {% endif %}
                 </div>
+                {% endif %}
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Xác nhận xóa sự kiện</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        
+        <div class="col-lg-4">
+            <!-- Creator Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-tie me-2"></i>Người tổ chức</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        {% if event.creator.profile and event.creator.profile.avatar %}
+                        <img src="{{ url_for('uploaded_file', filename='avatars/' + event.creator.profile.avatar) }}" class="rounded-circle me-3" width="60" height="60" alt="{{ event.creator.name }}">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='img/default-avatar.jpg') }}" class="rounded-circle me-3" width="60" height="60" alt="{{ event.creator.name }}">
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-1">{{ event.creator.name }}</h5>
+                            <div class="text-muted"><i class="fas fa-graduation-cap me-1"></i>Alumni</div>
+                        </div>
+                    </div>
+                    
+                    {% if event.creator.profile %}
+                        {% if event.creator.profile.company %}
+                        <div class="mt-3">
+                            <i class="fas fa-building me-2 text-primary"></i>{{ event.creator.profile.company }}
+                        </div>
+                        {% endif %}
+                        
+                        {% if event.creator.profile.position %}
+                        <div class="mt-2">
+                            <i class="fas fa-briefcase me-2 text-primary"></i>{{ event.creator.profile.position }}
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
             </div>
-            <div class="modal-body">
-                <p>Bạn có chắc chắn muốn xóa sự kiện này? Hành động này không thể hoàn tác.</p>
+            
+            <!-- Actions for creator or admin -->
+            {% if current_user.is_authenticated and (current_user.id == event.creator_id or current_user.role == 'admin') %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Quản lý sự kiện</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if current_user.id == event.creator_id %}
+                            <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-edit me-2"></i>Chỉnh sửa sự kiện
+                            </a>
+                            <a href="{{ url_for('event_registrations', event_id=event.id) }}" class="btn btn-outline-info">
+                                <i class="fas fa-clipboard-list me-2"></i>Quản lý đăng ký <span class="badge bg-info">{{ registrations_count }}</span>
+                            </a>
+                        {% endif %}
+                        
+                        {% if current_user.role == 'admin' and not event.is_published %}
+                            <form action="{{ url_for('admin_confirm_event', event_id=event.id) }}" method="post">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-check-circle me-2"></i>Duyệt sự kiện
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        <form action="{{ url_for('delete_event', event_id=event.id) }}" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa sự kiện này?');">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-trash-alt me-2"></i>Xóa sự kiện
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <form action="{{ url_for('alumni_delete_event', event_id=event.id) }}" method="POST" class="d-inline">
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash me-2"></i>Xóa
-                    </button>
-                </form>
+            {% endif %}
+            
+            <!-- Similar Events -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i>Sự kiện tương tự</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% set similar_events = events|default([]) %}
+                        {% if similar_events %}
+                            {% for similar_event in similar_events %}
+                                <a href="{{ url_for('event_detail', event_id=similar_event.id) }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1 text-truncate">{{ similar_event.title }}</h6>
+                                        <small>{{ similar_event.start_time.strftime('%d/%m') }}</small>
+                                    </div>
+                                    <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ similar_event.location }}</small>
+                                </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-3">
+                                <p class="text-muted mb-0">Chưa có sự kiện tương tự</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -184,10 +256,8 @@
 
 {% block scripts %}
 <script>
-// Show delete confirmation modal
-function deleteEvent() {
-    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    deleteModal.show();
-}
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any JavaScript needed for the event detail page
+});
 </script>
 {% endblock %} 

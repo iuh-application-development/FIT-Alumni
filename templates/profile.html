@@ -1,17 +1,144 @@
 {% extends "base.html" %}
 
-{% block title %}Hồ sơ - {{ current_user.name }}{% endblock %}
+{% block title %}Hồ sơ - {{ user.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-image: url('https://cdn.tapchitoaan.vn/media/images/ad(1).jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90vh; /* Đã sửa giá trị này thành 90vh */
+        background-color: rgba(255, 255, 255, 0.8); /* Thêm lớp nền trong suốt cho container */
+        padding: 20px; /* Thêm padding để nội dung không sát viền */
+        border-radius: 10px; /* Bo tròn góc container */
+    }
+
+    .profile-header {
+        padding: 20px;
+        background-color: rgba(248, 249, 250, 0.9); /* Nền trong suốt hơn */
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 20px;
+        border-radius: 8px;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #4a89dc;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #f0f4f8;
+        color: #4a89dc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 3px solid #4a89dc;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        margin: 0 auto;
+    }
+    
+    .profile-avatar-placeholder:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(-10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+        background-color: rgba(255, 255, 255, 0.95);
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        border-left: 4px solid #4a89dc;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header {
+        background: linear-gradient(to right, #4a89dc, #5a9ae0);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        padding: 15px;
+        border-radius: 12px 12px 0 0;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .card-header i {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .card-body {
+        padding: 20px;
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        border-radius: 0 0 12px 12px;
+    }
+    
+    .info-item label, .education-item h5, .experience-item h5 {
+        color: #4a89dc;
+        font-weight: 500;
+    }
+    
+    .badge.bg-primary {
+        background: linear-gradient(to right, #4a89dc, #5a9ae0) !important;
+        padding: 8px 12px;
+        font-weight: 500;
+        border-radius: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .badge.bg-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
     <div class="row">
-        <!-- Profile Header -->
         <div class="col-12">
             <div class="profile-header fade-in">
                 <div class="row align-items-center">
                     <div class="col-md-3 text-center">
                         {% if profile and profile.avatar %}
-                            <img src="{{ url_for('static', filename='uploads/' + profile.avatar) }}" 
+                            <img src="{{ url_for('static', filename='uploads/avatars/' + profile.avatar) }}"
                                  class="profile-avatar" alt="Avatar">
                         {% else %}
                             <div class="profile-avatar-placeholder">
@@ -20,26 +147,32 @@
                         {% endif %}
                     </div>
                     <div class="col-md-9">
-                        <h2 class="mb-2">{{ current_user.name }}</h2>
-                        <p class="mb-1"><i class="fas fa-envelope me-2"></i>{{ current_user.email }}</p>
+                        <h2 class="mb-2">{{ user.name }}</h2>
+                        <p class="mb-1"><i class="fas fa-envelope me-2"></i>{{ user.email }}</p>
                         <p class="mb-1">
                             <i class="fas fa-user-tag me-2"></i>
-                            <span class="badge bg-{{ 'danger' if current_user.role == 'admin' else 'success' if current_user.role == 'alumni' else 'primary' }}">
-                                {{ 'Quản trị viên' if current_user.role == 'admin' else 'Cựu sinh viên' if current_user.role == 'alumni' else 'Sinh viên' }}
+                            <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'success' if user.role == 'alumni' else 'primary' }}">
+                                {{ 'Quản trị viên' if user.role == 'admin' else 'Cựu sinh viên' if user.role == 'alumni' else 'Sinh viên' }}
                             </span>
                         </p>
                         <p class="mb-0">
                             <i class="fas fa-calendar-alt me-2"></i>
-                            Tham gia từ {{ current_user.created_at.strftime('%d/%m/%Y') }}
+                            Tham gia từ {{ user.created_at.strftime('%d/%m/%Y') }}
                         </p>
+                        
+                        {% if is_current_user %}
+                        <div class="mt-3">
+                            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+                                <i class="fas fa-edit me-2"></i>Chỉnh sửa hồ sơ
+                            </a>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Profile Content -->
         <div class="col-md-4 mt-4">
-            <!-- Personal Info Card -->
             <div class="card mb-4 fade-in">
                 <div class="card-header d-flex align-items-center">
                     <i class="fas fa-info-circle me-2"></i>
@@ -73,7 +206,36 @@
                 </div>
             </div>
 
-            <!-- Skills Card -->
+            {% if is_current_user %}
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-file-alt me-2"></i>
+                    <span>Bài viết của tôi</span>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Quản lý các bài viết đã đăng trên hệ thống.</p>
+                    <a href="{{ url_for('user_posts') }}" class="btn w-100" style="background: linear-gradient(to right, #4a89dc, #5a9ae0); color: white; border-radius: 25px; box-shadow: 0 4px 10px rgba(74, 137, 220, 0.3);">
+                        <i class="fas fa-file-alt me-2"></i>Xem bài viết của tôi
+                    </a>
+                </div>
+            </div>
+            
+            {% if profile_completion %}
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-tasks me-2"></i>
+                    <span>Hoàn thành hồ sơ</span>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ profile_completion }}%;" aria-valuenow="{{ profile_completion }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="text-center mb-0">{{ profile_completion }}% hoàn thành</p>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+
             <div class="card fade-in">
                 <div class="card-header d-flex align-items-center">
                     <i class="fas fa-tools me-2"></i>
@@ -94,7 +256,6 @@
         </div>
 
         <div class="col-md-8 mt-4">
-            <!-- Education Card -->
             <div class="card mb-4 fade-in">
                 <div class="card-header d-flex align-items-center">
                     <i class="fas fa-graduation-cap me-2"></i>
@@ -107,7 +268,8 @@
                                 <h5 class="mb-1">{{ edu.school }}</h5>
                                 <p class="text-muted mb-1">{{ edu.major }}</p>
                                 <p class="text-muted mb-0">
-                                    {{ edu.start_date }} - {{ edu.end_date }}
+                                    {{ edu.start_date.strftime('%d/%m/%Y') if edu.start_date else 'Không xác định' }} - 
+                                    {{ edu.end_date.strftime('%d/%m/%Y') if edu.end_date else 'Hiện tại' }}
                                 </p>
                             </div>
                             {% if not loop.last %}
@@ -120,7 +282,6 @@
                 </div>
             </div>
 
-            <!-- Experience Card -->
             <div class="card fade-in">
                 <div class="card-header d-flex align-items-center">
                     <i class="fas fa-briefcase me-2"></i>
@@ -133,7 +294,8 @@
                                 <h5 class="mb-1">{{ exp.position }}</h5>
                                 <p class="text-muted mb-1">{{ exp.company }}</p>
                                 <p class="text-muted mb-1">
-                                    {{ exp.start_date }} - {{ exp.end_date }}
+                                    {{ exp.start_date.strftime('%d/%m/%Y') if exp.start_date else 'Không xác định' }} - 
+                                    {{ exp.end_date.strftime('%d/%m/%Y') if exp.end_date else 'Hiện tại' }}
                                 </p>
                                 <p class="mb-0">{{ exp.description }}</p>
                             </div>
@@ -149,4 +311,4 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}

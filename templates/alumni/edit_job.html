@@ -76,9 +76,23 @@
 
                         <!-- Loại công việc -->
                         <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label text-sm-end">Loại công việc</label>
-                            <div class="col-sm-9">
-                                {{ form.job_type(class="form-select") }}
+                            <div class="col-md-6">
+                                <label for="job_type" class="form-label">Loại công việc <span class="text-danger">*</span></label>
+                                <select class="form-select" id="job_type" name="job_type" required>
+                                    <option value="">Chọn loại công việc</option>
+                                    {% for job_type in job_types %}
+                                    <option value="{{ job_type }}" {% if job.job_type == job_type %}selected{% endif %}>{{ job_type }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="experience" class="form-label">Kinh nghiệm</label>
+                                <select class="form-select" id="experience" name="experience">
+                                    <option value="">Chọn yêu cầu kinh nghiệm</option>
+                                    {% for level in levels %}
+                                    <option value="{{ level }}" {% if job.experience == level %}selected{% endif %}>{{ level }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
 
@@ -108,17 +122,18 @@
 
                         <!-- Số lượng cần tuyển -->
                         <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label text-sm-end">Số lượng cần tuyển</label>
-                            <div class="col-sm-9">
-                                {{ form.positions(class="form-control", type="number", min="1") }}
+                            <div class="col-md-6">
+                                <label for="work_type" class="form-label">Hình thức làm việc</label>
+                                <select class="form-select" id="work_type" name="work_type">
+                                    <option value="">Chọn hình thức làm việc</option>
+                                    {% for work_type in work_types %}
+                                    <option value="{{ work_type }}" {% if job.work_type == work_type %}selected{% endif %}>{{ work_type }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
-                        </div>
-
-                        <!-- Kinh nghiệm -->
-                        <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label text-sm-end">Kinh nghiệm</label>
-                            <div class="col-sm-9">
-                                {{ form.experience(class="form-select") }}
+                            <div class="col-md-6">
+                                <label for="positions" class="form-label">Số lượng cần tuyển</label>
+                                <input type="number" class="form-control" id="positions" name="positions" min="1" value="{{ job.headcount or 1 }}">
                             </div>
                         </div>
 
