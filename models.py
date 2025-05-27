@@ -90,6 +90,7 @@ class Job(db.Model):
     location = db.Column(db.String(200), nullable=False)
     job_type = db.Column(db.String(50))
     experience = db.Column(db.String(50))
+    work_type = db.Column(db.String(50))
     headcount = db.Column(db.Integer, default=1)
     deadline = db.Column(db.DateTime(timezone=True))
     company_logo = db.Column(db.String(200))
@@ -113,6 +114,9 @@ class JobApplication(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
     status = db.Column(db.String(20), default='pending')
+    cover_letter = db.Column(db.Text)
+    resume_path = db.Column(db.String(255))
+    is_viewed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref=db.backref('job_applications', lazy=True))
 

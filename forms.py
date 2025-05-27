@@ -37,6 +37,14 @@ class JobForm(FlaskForm):
         ('5_plus_years', 'Trên 5 năm')
     ])
     
+    work_type = SelectField('Hình thức làm việc', choices=[
+        ('', 'Chọn hình thức làm việc'),
+        ('Full-time', 'Toàn thời gian'),
+        ('Part-time', 'Bán thời gian'),
+        ('Remote', 'Làm từ xa'),
+        ('Hybrid', 'Kết hợp')
+    ])
+    
     salary_min = StringField('Lương tối thiểu')
     salary_max = StringField('Lương tối đa')
     salary_currency = SelectField('Đơn vị', choices=[
