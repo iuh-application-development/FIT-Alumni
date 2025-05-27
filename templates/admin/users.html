@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý người dùng - FIT Alumni{% endblock %}
+
+{% block extra_css %}
+<style>
+    .user-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    .user-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    .user-card.admin {
+        border-left-color: #dc3545;
+    }
+    .user-card.alumni {
+        border-left-color: #198754;
+    }
+    .user-card.user {
+        border-left-color: #0dcaf0;
+    }
+    .stats-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    .search-container {
+        position: relative;
+    }
+    .search-container .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        color: #6c757d;
+    }
+    .search-container input {
+        padding-left: 40px;
+        border-radius: 30px;
+    }
+    .role-filter-btn {
+        border-radius: 30px;
+    }
+    .avatar-placeholder {
+        width: 50px;
+        height: 50px;
+        background-color: #e9ecef;
+        color: #6c757d;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Quản lý người dùng</h2>
+            <p class="text-muted">Quản lý tất cả người dùng trong hệ thống</p>
+        </div>
+        <button class="btn btn-primary" disabled>
+            <i class="fas fa-user-plus me-2"></i>Thêm người dùng
+        </button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card card bg-primary text-white h-100 py-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-white">Tổng người dùng</h5>
+                            <h2 class="display-6 fw-bold mb-0">{{ users|length }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                            <i class="fas fa-users fa-2x text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card card bg-success text-white h-100 py-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-white">Cựu sinh viên</h5>
+                            <h2 class="display-6 fw-bold mb-0">{{ users|selectattr('role', 'equalto', 'alumni')|list|length }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                            <i class="fas fa-user-graduate fa-2x text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card card bg-info text-white h-100 py-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-white">Người dùng</h5>
+                            <h2 class="display-6 fw-bold mb-0">{{ users|selectattr('role', 'equalto', 'user')|list|length }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                            <i class="fas fa-user fa-2x text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card card bg-danger text-white h-100 py-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-white">Quản trị viên</h5>
+                            <h2 class="display-6 fw-bold mb-0">{{ users|selectattr('role', 'equalto', 'admin')|list|length }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                            <i class="fas fa-user-shield fa-2x text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="search-container">
+                <form class="d-flex" method="GET">
+                    <div class="search-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <input type="text" name="search" class="form-control form-control-lg me-2" 
+                           placeholder="Tìm kiếm theo tên, email..." 
+                           value="{{ request.args.get('search', '') }}">
+                    <button type="submit" class="btn btn-primary px-4">Tìm kiếm</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex justify-content-end">
+                <div class="btn-group">
+                    <a href="{{ url_for('admin_users') }}" 
+                       class="btn {{ 'btn-primary' if not request.args.get('role') else 'btn-outline-primary' }} role-filter-btn">
+                        Tất cả
+                    </a>
+                    <a href="{{ url_for('admin_users', role='admin') }}" 
+                       class="btn {{ 'btn-primary' if request.args.get('role') == 'admin' else 'btn-outline-primary' }} role-filter-btn">
+                        Quản trị viên
+                    </a>
+                    <a href="{{ url_for('admin_users', role='alumni') }}" 
+                       class="btn {{ 'btn-primary' if request.args.get('role') == 'alumni' else 'btn-outline-primary' }} role-filter-btn">
+                        Cựu sinh viên
+                    </a>
+                    <a href="{{ url_for('admin_users', role='user') }}" 
+                       class="btn {{ 'btn-primary' if request.args.get('role') == 'user' else 'btn-outline-primary' }} role-filter-btn">
+                        Người dùng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table with Enhanced UI -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách người dùng</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Người dùng</th>
+                            <th>Email</th>
+                            <th>Vai trò</th>
+                            <th>Ngày tạo</th>
+                            <th class="text-end pe-4">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr class="user-card {{ user.role }}">
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        {% if user.profile and user.profile.avatar %}
+                                            <img src="{{ url_for('static', filename='uploads/avatars/' + user.profile.avatar) }}" 
+                                                 alt="{{ user.name }}" class="rounded-circle me-3" width="50" height="50">
+                                        {% else %}
+                                            <div class="avatar-placeholder me-3">
+                                                {{ user.name[:1].upper() }}
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="fw-bold mb-0">{{ user.name }}</h6>
+                                            <small class="text-muted">ID: {{ user.id }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge rounded-pill bg-{{ 'danger' if user.role == 'admin' else 'success' if user.role == 'alumni' else 'info' }} px-3 py-2">
+                                        <i class="fas fa-{{ 'user-shield' if user.role == 'admin' else 'user-graduate' if user.role == 'alumni' else 'user' }} me-1"></i>
+                                        {{ user.role }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <i class="far fa-calendar-alt me-1 text-muted"></i>
+                                    {{ user.created_at.strftime('%d/%m/%Y') }}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="{{ url_for('admin_view_user', user_id=user.id) }}" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-eye me-1"></i>Xem
+                                    </a>
+                                    {% if user.role != 'admin' %}
+                                        <form action="{{ url_for('delete_user', user_id=user.id) }}" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng {{ user.name }}?')">
+                                                <i class="fas fa-trash-alt me-1"></i>Xóa
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="py-5">
+                                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                        <h5 class="text-muted">Không có người dùng nào</h5>
+                                        <p class="text-muted">Không tìm thấy người dùng phù hợp với tiêu chí tìm kiếm</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination - for future use when implementing pagination -->
+    <div class="d-flex justify-content-center mt-4">
+        <nav>
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %} 

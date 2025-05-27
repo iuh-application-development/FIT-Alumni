@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết đơn ứng tuyển{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Chi tiết đơn ứng tuyển</h1>
+        <a href="{{ url_for('admin_applications') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Application Info -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Thông tin đơn ứng tuyển</h5>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Công việc:</div>
+                        <div class="col-md-8">
+                            <a href="{{ url_for('job_detail', job_id=application.job.id) }}" class="text-decoration-none">
+                                {{ application.job.title }}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Ứng viên:</div>
+                        <div class="col-md-8">
+                            <a href="{{ url_for('admin_user_detail', user_id=application.applicant.id) }}" class="text-decoration-none">
+                                {{ application.applicant.name }}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Ngày ứng tuyển:</div>
+                        <div class="col-md-8">{{ application.created_at.strftime('%d/%m/%Y') }}</div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Trạng thái:</div>
+                        <div class="col-md-8">
+                            {% if application.status == 'pending' %}
+                            <span class="badge bg-warning">Chờ phản hồi</span>
+                            {% elif application.status == 'accepted' %}
+                            <span class="badge bg-success">Đã chấp nhận</span>
+                            {% else %}
+                            <span class="badge bg-danger">Đã từ chối</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if application.status != 'pending' %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Ngày cập nhật:</div>
+                        <div class="col-md-8">{{ application.updated_at.strftime('%d/%m/%Y') }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if application.status == 'rejected' %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Lý do từ chối:</div>
+                        <div class="col-md-8">{{ application.reject_reason }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Cover Letter -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Thư xin việc</h5>
+                    <div class="border rounded p-3 bg-light">
+                        {{ application.cover_letter | nl2br }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">CV/Resume</h5>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-file-pdf fa-2x text-danger me-3"></i>
+                        <div>
+                            <a href="{{ url_for('download_resume', filename=application.resume_path) }}" class="text-decoration-none">
+                                {{ application.resume_path }}
+                            </a>
+                            <div class="text-muted small">Tải xuống CV/Resume</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Info -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Thông tin công việc</h5>
+                    
+                    <div class="mb-3">
+                        <div class="fw-bold">Mô tả công việc:</div>
+                        <div class="text-muted">{{ application.job.description | truncate(200) }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="fw-bold">Yêu cầu:</div>
+                        <div class="text-muted">{{ application.job.requirements | truncate(200) }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="fw-bold">Địa điểm:</div>
+                        <div class="text-muted">{{ application.job.location }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="fw-bold">Mức lương:</div>
+                        <div class="text-muted">{{ application.job.salary_range }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="fw-bold">Hạn nộp hồ sơ:</div>
+                        <div class="text-muted">{{ application.job.deadline.strftime('%d/%m/%Y') }}</div>
+                    </div>
+                    
+                    <a href="{{ url_for('job_detail', job_id=application.job.id) }}" class="btn btn-primary w-100">
+                        Xem chi tiết công việc
+                    </a>
+                </div>
+            </div>
+
+            <!-- Applicant Info -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Thông tin ứng viên</h5>
+                    
+                    <div class="mb-3">
+                        <div class="fw-bold">Họ tên:</div>
+                        <div class="text-muted">{{ application.applicant.name }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="fw-bold">Email:</div>
+                        <div class="text-muted">{{ application.applicant.email }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="fw-bold">Số điện thoại:</div>
+                        <div class="text-muted">{{ application.applicant.profile.phone if application.applicant.profile else 'Chưa cập nhật' }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="fw-bold">Địa chỉ:</div>
+                        <div class="text-muted">{{ application.applicant.profile.address if application.applicant.profile else 'Chưa cập nhật' }}</div>
+                    </div>
+                    
+                    <a href="{{ url_for('admin_user_detail', user_id=application.applicant.id) }}" class="btn btn-primary w-100">
+                        Xem hồ sơ ứng viên
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    {% if application.status == 'pending' %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-success" onclick="approveApplication({{ application.id }})">
+                            <i class="fas fa-check me-2"></i>Chấp nhận
+                        </button>
+                        <button class="btn btn-danger" onclick="rejectApplication({{ application.id }})">
+                            <i class="fas fa-times me-2"></i>Từ chối
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Reject Application Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Từ chối đơn ứng tuyển</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rejectForm">
+                    <input type="hidden" id="rejectApplicationId">
+                    <div class="mb-3">
+                        <label for="rejectReason" class="form-label">Lý do từ chối</label>
+                        <textarea class="form-control" id="rejectReason" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" onclick="submitReject()">Từ chối</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function approveApplication(applicationId) {
+    if (confirm('Bạn có chắc chắn muốn chấp nhận đơn ứng tuyển này?')) {
+        fetch(`/admin/applications/${applicationId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra khi chấp nhận đơn ứng tuyển');
+            }
+        });
+    }
+}
+
+function rejectApplication(applicationId) {
+    document.getElementById('rejectApplicationId').value = applicationId;
+    new bootstrap.Modal(document.getElementById('rejectModal')).show();
+}
+
+function submitReject() {
+    const applicationId = document.getElementById('rejectApplicationId').value;
+    const reason = document.getElementById('rejectReason').value;
+    
+    fetch(`/admin/applications/${applicationId}/reject`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Có lỗi xảy ra khi từ chối đơn ứng tuyển');
+        }
+    });
+}
+</script>
+{% endblock %} 

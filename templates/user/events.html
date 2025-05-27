@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Sự kiện của tôi{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm fade-in">
+                <div class="card-header bg-primary text-white d-flex justify-content-between">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Sự kiện của tôi
+                    </h4>
+                    <a href="{{ url_for('events') }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-search me-1"></i>Tìm sự kiện khác
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <div class="col-md-3 border-end">
+                            <div class="list-group list-group-flush">
+                                <a href="#upcoming" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                                    <i class="fas fa-calendar-day me-2"></i>Sự kiện sắp tới
+                                    <span class="badge rounded-pill bg-primary float-end">{{ upcoming_events|length }}</span>
+                                </a>
+                                <a href="#past" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                                    <i class="fas fa-calendar-check me-2"></i>Sự kiện đã tham gia
+                                    <span class="badge rounded-pill bg-secondary float-end">{{ past_events|length }}</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="tab-content p-3" style="min-height: 300px;">
+                                <div class="tab-pane fade show active" id="upcoming">
+                                    {% if upcoming_events %}
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Tên sự kiện</th>
+                                                        <th>Thời gian</th>
+                                                        <th>Địa điểm</th>
+                                                        <th>Trạng thái</th>
+                                                        <th>Thao tác</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for event_info in upcoming_events %}
+                                                    <tr>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                {% if event_info.event.image %}
+                                                                <img src="{{ url_for('uploaded_file', filename='events/' + event_info.event.image) }}" 
+                                                                    alt="{{ event_info.event.title }}" 
+                                                                    class="rounded me-2" 
+                                                                    style="width: 40px; height: 40px; object-fit: cover;">
+                                                                {% else %}
+                                                                <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" 
+                                                                    style="width: 40px; height: 40px;">
+                                                                    <i class="fas fa-calendar-alt text-primary"></i>
+                                                                </div>
+                                                                {% endif %}
+                                                                <div>
+                                                                    <a href="{{ url_for('event_detail', event_id=event_info.event.id) }}" class="text-decoration-none">
+                                                                        {{ event_info.event.title }}
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            {{ event_info.event.start_time.strftime('%d/%m/%Y %H:%M') }}
+                                                        </td>
+                                                        <td>
+                                                            <span class="d-inline-block text-truncate" style="max-width: 150px;">
+                                                                {{ event_info.event.location }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            {% if event_info.registration_status == 'registered' %}
+                                                                <span class="badge bg-success">Đã đăng ký</span>
+                                                            {% elif event_info.registration_status == 'canceled' %}
+                                                                <span class="badge bg-danger">Đã hủy</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                <a href="{{ url_for('event_detail', event_id=event_info.event.id) }}" class="btn btn-outline-primary">
+                                                                    <i class="fas fa-info-circle"></i>
+                                                                </a>
+                                                                {% if event_info.registration_status == 'registered' %}
+                                                                <form action="{{ url_for('cancel_event_registration', event_id=event_info.event.id) }}" method="post">
+                                                                    <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Bạn có chắc muốn hủy đăng ký sự kiện này?');">
+                                                                        <i class="fas fa-times-circle"></i>
+                                                                    </button>
+                                                                </form>
+                                                                {% endif %}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-5">
+                                            <div class="mb-3">
+                                                <i class="fas fa-calendar-alt fa-4x text-muted"></i>
+                                            </div>
+                                            <h4>Bạn không có sự kiện sắp tới nào</h4>
+                                            <p class="text-muted">Hãy tìm và đăng ký tham gia các sự kiện mới!</p>
+                                            <a href="{{ url_for('events') }}" class="btn btn-primary mt-2">
+                                                <i class="fas fa-search me-2"></i>Tìm sự kiện
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="tab-pane fade" id="past">
+                                    {% if past_events %}
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Tên sự kiện</th>
+                                                        <th>Thời gian</th>
+                                                        <th>Địa điểm</th>
+                                                        <th>Trạng thái</th>
+                                                        <th>Thao tác</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for event_info in past_events %}
+                                                    <tr>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                {% if event_info.event.image %}
+                                                                <img src="{{ url_for('uploaded_file', filename='events/' + event_info.event.image) }}" 
+                                                                    alt="{{ event_info.event.title }}" 
+                                                                    class="rounded me-2" 
+                                                                    style="width: 40px; height: 40px; object-fit: cover;">
+                                                                {% else %}
+                                                                <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" 
+                                                                    style="width: 40px; height: 40px;">
+                                                                    <i class="fas fa-calendar-alt text-primary"></i>
+                                                                </div>
+                                                                {% endif %}
+                                                                <div>
+                                                                    <a href="{{ url_for('event_detail', event_id=event_info.event.id) }}" class="text-decoration-none">
+                                                                        {{ event_info.event.title }}
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            {{ event_info.event.start_time.strftime('%d/%m/%Y %H:%M') }}
+                                                        </td>
+                                                        <td>
+                                                            <span class="d-inline-block text-truncate" style="max-width: 150px;">
+                                                                {{ event_info.event.location }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            {% if event_info.registration_status == 'attended' %}
+                                                                <span class="badge bg-success">Đã tham gia</span>
+                                                            {% elif event_info.registration_status == 'canceled' %}
+                                                                <span class="badge bg-danger">Đã hủy</span>
+                                                            {% else %}
+                                                                <span class="badge bg-secondary">Đã kết thúc</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            <a href="{{ url_for('event_detail', event_id=event_info.event.id) }}" class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-info-circle"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-5">
+                                            <div class="mb-3">
+                                                <i class="fas fa-history fa-4x text-muted"></i>
+                                            </div>
+                                            <h4>Bạn chưa tham gia sự kiện nào</h4>
+                                            <p class="text-muted">Lịch sử tham gia sự kiện sẽ hiển thị ở đây</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Bootstrap tabs
+    var triggerTabList = [].slice.call(document.querySelectorAll('[data-bs-toggle="list"]'))
+    triggerTabList.forEach(function (triggerEl) {
+        var tabTrigger = new bootstrap.Tab(triggerEl)
+        triggerEl.addEventListener('click', function (event) {
+            event.preventDefault()
+            tabTrigger.show()
+        })
+    })
+});
+</script>
+{% endblock %} 

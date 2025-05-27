@@ -1,130 +1,314 @@
 {% extends "base.html" %}
 
-{% block title %}Profile - Alumni Network{% endblock %}
+{% block title %}Hồ sơ - {{ user.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-image: url('https://cdn.tapchitoaan.vn/media/images/ad(1).jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90vh; /* Đã sửa giá trị này thành 90vh */
+        background-color: rgba(255, 255, 255, 0.8); /* Thêm lớp nền trong suốt cho container */
+        padding: 20px; /* Thêm padding để nội dung không sát viền */
+        border-radius: 10px; /* Bo tròn góc container */
+    }
+
+    .profile-header {
+        padding: 20px;
+        background-color: rgba(248, 249, 250, 0.9); /* Nền trong suốt hơn */
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 20px;
+        border-radius: 8px;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #4a89dc;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #f0f4f8;
+        color: #4a89dc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 3px solid #4a89dc;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        margin: 0 auto;
+    }
+    
+    .profile-avatar-placeholder:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(-10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+        background-color: rgba(255, 255, 255, 0.95);
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        border-left: 4px solid #4a89dc;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header {
+        background: linear-gradient(to right, #4a89dc, #5a9ae0);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        padding: 15px;
+        border-radius: 12px 12px 0 0;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .card-header i {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .card-body {
+        padding: 20px;
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        border-radius: 0 0 12px 12px;
+    }
+    
+    .info-item label, .education-item h5, .experience-item h5 {
+        color: #4a89dc;
+        font-weight: 500;
+    }
+    
+    .badge.bg-primary {
+        background: linear-gradient(to right, #4a89dc, #5a9ae0) !important;
+        padding: 8px 12px;
+        font-weight: 500;
+        border-radius: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .badge.bg-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="profile-header">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-3 text-center">
-                {% if current_user.profile and current_user.profile.avatar %}
-                <img src="{{ current_user.profile.avatar }}" alt="Profile Avatar" class="profile-avatar">
-                {% else %}
-                <img src="{{ url_for('static', filename='uploads/default-avatar.png') }}" alt="Default Avatar" class="profile-avatar">
-                {% endif %}
-                <form method="POST" action="{{ url_for('update_avatar') }}" enctype="multipart/form-data" class="mt-3">
-                    <div class="mb-3">
-                        <input type="file" class="form-control" name="avatar" accept="image/*">
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-sm">Update Avatar</button>
-                </form>
-            </div>
-            <div class="col-md-9">
-                <h2>{{ current_user.username }}</h2>
-                {% if current_user.profile %}
-                <p class="lead">{{ current_user.profile.current_job }}</p>
-                <p>{{ current_user.profile.location }}</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="container">
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
     <div class="row">
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4>Profile Information</h4>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('update_profile') }}">
-                        <div class="mb-3">
-                            <label for="full_name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="full_name" name="full_name" 
-                                value="{{ current_user.profile.full_name if current_user.profile else '' }}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="current_job" class="form-label">Current Job</label>
-                            <input type="text" class="form-control" id="current_job" name="current_job"
-                                value="{{ current_user.profile.current_job if current_user.profile else '' }}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="location" class="form-label">Location</label>
-                            <input type="text" class="form-control" id="location" name="location"
-                                value="{{ current_user.profile.location if current_user.profile else '' }}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="bio" class="form-label">Bio</label>
-                            <textarea class="form-control" id="bio" name="bio" rows="4">{{ current_user.profile.bio if current_user.profile else '' }}</textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update Profile</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h4>My Posts</h4>
-                </div>
-                <div class="card-body">
-                    {% for post in current_user.posts %}
-                    <div class="post-item mb-3">
-                        <h5>{{ post.title }}</h5>
-                        <p class="text-muted">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
-                        <p>{{ post.content[:200] }}...</p>
-                        <div class="btn-group">
-                            <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <a href="{{ url_for('delete_post', post_id=post.id) }}" class="btn btn-sm btn-outline-danger" 
-                               onclick="return confirm('Are you sure you want to delete this post?')">Delete</a>
-                        </div>
+        <div class="col-12">
+            <div class="profile-header fade-in">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center">
+                        {% if profile and profile.avatar %}
+                            <img src="{{ url_for('static', filename='uploads/avatars/' + profile.avatar) }}"
+                                 class="profile-avatar" alt="Avatar">
+                        {% else %}
+                            <div class="profile-avatar-placeholder">
+                                <i class="fas fa-user-circle fa-6x"></i>
+                            </div>
+                        {% endif %}
                     </div>
-                    {% else %}
-                    <p class="text-muted">No posts yet.</p>
-                    {% endfor %}
+                    <div class="col-md-9">
+                        <h2 class="mb-2">{{ user.name }}</h2>
+                        <p class="mb-1"><i class="fas fa-envelope me-2"></i>{{ user.email }}</p>
+                        <p class="mb-1">
+                            <i class="fas fa-user-tag me-2"></i>
+                            <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'success' if user.role == 'alumni' else 'primary' }}">
+                                {{ 'Quản trị viên' if user.role == 'admin' else 'Cựu sinh viên' if user.role == 'alumni' else 'Sinh viên' }}
+                            </span>
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Tham gia từ {{ user.created_at.strftime('%d/%m/%Y') }}
+                        </p>
+                        
+                        {% if is_current_user %}
+                        <div class="mt-3">
+                            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+                                <i class="fas fa-edit me-2"></i>Chỉnh sửa hồ sơ
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4>Account Settings</h4>
+        <div class="col-md-4 mt-4">
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span>Thông tin cá nhân</span>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('update_password') }}">
-                        <div class="mb-3">
-                            <label for="current_password" class="form-label">Current Password</label>
-                            <input type="password" class="form-control" id="current_password" name="current_password">
+                    {% if profile %}
+                        <div class="info-item mb-3">
+                            <label class="text-muted d-block">Số điện thoại</label>
+                            <p class="mb-0">{{ profile.phone or 'Chưa cập nhật' }}</p>
                         </div>
-                        <div class="mb-3">
-                            <label for="new_password" class="form-label">New Password</label>
-                            <input type="password" class="form-control" id="new_password" name="new_password">
+                        <div class="info-item mb-3">
+                            <label class="text-muted d-block">Địa chỉ</label>
+                            <p class="mb-0">{{ profile.address or 'Chưa cập nhật' }}</p>
                         </div>
-                        <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Confirm New Password</label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                        <div class="info-item mb-3">
+                            <label class="text-muted d-block">Công ty</label>
+                            <p class="mb-0">{{ profile.company or 'Chưa cập nhật' }}</p>
                         </div>
-                        <button type="submit" class="btn btn-primary">Update Password</button>
-                    </form>
+                        <div class="info-item mb-3">
+                            <label class="text-muted d-block">Vị trí</label>
+                            <p class="mb-0">{{ profile.position or 'Chưa cập nhật' }}</p>
+                        </div>
+                        <div class="info-item">
+                            <label class="text-muted d-block">Giới thiệu</label>
+                            <p class="mb-0">{{ profile.bio or 'Chưa cập nhật' }}</p>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">Chưa cập nhật thông tin</p>
+                    {% endif %}
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h4>Account Actions</h4>
+            {% if is_current_user %}
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-file-alt me-2"></i>
+                    <span>Bài viết của tôi</span>
                 </div>
                 <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('confirm_logout') }}" class="btn btn-outline-danger">Logout</a>
-                        <a href="{{ url_for('delete_account') }}" class="btn btn-outline-danger" 
-                           onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
-                            Delete Account
-                        </a>
+                    <p class="mb-3">Quản lý các bài viết đã đăng trên hệ thống.</p>
+                    <a href="{{ url_for('user_posts') }}" class="btn w-100" style="background: linear-gradient(to right, #4a89dc, #5a9ae0); color: white; border-radius: 25px; box-shadow: 0 4px 10px rgba(74, 137, 220, 0.3);">
+                        <i class="fas fa-file-alt me-2"></i>Xem bài viết của tôi
+                    </a>
+                </div>
+            </div>
+            
+            {% if profile_completion %}
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-tasks me-2"></i>
+                    <span>Hoàn thành hồ sơ</span>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ profile_completion }}%;" aria-valuenow="{{ profile_completion }}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
+                    <p class="text-center mb-0">{{ profile_completion }}% hoàn thành</p>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <div class="card fade-in">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-tools me-2"></i>
+                    <span>Kỹ năng</span>
+                </div>
+                <div class="card-body">
+                    {% if skills %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in skills %}
+                                <span class="badge bg-primary">{{ skill.name }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">Chưa cập nhật kỹ năng</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 mt-4">
+            <div class="card mb-4 fade-in">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-graduation-cap me-2"></i>
+                    <span>Học vấn</span>
+                </div>
+                <div class="card-body">
+                    {% if education %}
+                        {% for edu in education %}
+                            <div class="education-item mb-4">
+                                <h5 class="mb-1">{{ edu.school }}</h5>
+                                <p class="text-muted mb-1">{{ edu.major }}</p>
+                                <p class="text-muted mb-0">
+                                    {{ edu.start_date.strftime('%d/%m/%Y') if edu.start_date else 'Không xác định' }} - 
+                                    {{ edu.end_date.strftime('%d/%m/%Y') if edu.end_date else 'Hiện tại' }}
+                                </p>
+                            </div>
+                            {% if not loop.last %}
+                                <hr>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted mb-0">Chưa cập nhật thông tin học vấn</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card fade-in">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-briefcase me-2"></i>
+                    <span>Kinh nghiệm làm việc</span>
+                </div>
+                <div class="card-body">
+                    {% if experience %}
+                        {% for exp in experience %}
+                            <div class="experience-item mb-4">
+                                <h5 class="mb-1">{{ exp.position }}</h5>
+                                <p class="text-muted mb-1">{{ exp.company }}</p>
+                                <p class="text-muted mb-1">
+                                    {{ exp.start_date.strftime('%d/%m/%Y') if exp.start_date else 'Không xác định' }} - 
+                                    {{ exp.end_date.strftime('%d/%m/%Y') if exp.end_date else 'Hiện tại' }}
+                                </p>
+                                <p class="mb-0">{{ exp.description }}</p>
+                            </div>
+                            {% if not loop.last %}
+                                <hr>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted mb-0">Chưa cập nhật kinh nghiệm làm việc</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}

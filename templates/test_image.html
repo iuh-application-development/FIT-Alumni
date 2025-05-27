@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Kiểm tra hiển thị hình ảnh{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Kiểm tra hiển thị hình ảnh</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Đường dẫn thư mục hình ảnh: {{ posts_path }}</h6>
+                    
+                    {% if not image_files %}
+                    <div class="alert alert-warning">
+                        Không tìm thấy hình ảnh trong thư mục {{ posts_path }}
+                    </div>
+                    {% else %}
+                    <p>Số lượng hình ảnh: {{ image_files|length }}</p>
+                    
+                    <h4 class="mt-4">Kiểm tra cách 1: Sử dụng url_for('static', filename=...)</h4>
+                    <div class="row">
+                        {% for image in image_files %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <img src="{{ url_for('static', filename='uploads/posts/' + image) }}" class="card-img-top" alt="{{ image }}">
+                                <div class="card-body">
+                                    <p class="card-text">{{ image }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <h4 class="mt-4">Kiểm tra cách 2: Sử dụng đường dẫn trực tiếp /static/uploads/posts/</h4>
+                    <div class="row">
+                        {% for image in image_files %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <img src="/static/uploads/posts/{{ image }}" class="card-img-top" alt="{{ image }}">
+                                <div class="card-body">
+                                    <p class="card-text">{{ image }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

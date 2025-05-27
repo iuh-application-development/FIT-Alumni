@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }} - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Job Header -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center">
+                    {% if job.company_logo %}
+                    <div class="company-logo-detail">
+                        <img src="{{ url_for('static', filename='uploads/company_logos/' + job.company_logo) }}" 
+                             alt="{{ job.company_name }}">
+                    </div>
+                    {% else %}
+                    <div class="company-logo-detail">
+                        <i class="fas fa-building fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-7">
+                    <h1 class="job-detail-title mb-2">{{ job.title }}</h1>
+                    <div class="company-detail-name mb-3">{{ job.company_name }}</div>
+                    <div class="job-detail-meta">
+                        <span class="job-detail-location"><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+                        {% if job.job_type %}
+                        <span class="job-detail-tag">{{ job.job_type }}</span>
+                        {% endif %}
+                        {% if job.level %}
+                        <span class="job-detail-tag">{{ job.level }}</span>
+                        {% endif %}
+                        {% if job.headcount %}
+                        <span class="job-detail-tag">{{ job.headcount }} vị trí</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-3 text-end">
+                    <div class="job-detail-salary mb-2">
+                        {% if job.salary_display == 'Thỏa thuận' %}
+                        <div class="job-detail-negotiable"><i class="fas fa-check-circle"></i> Thỏa thuận</div>
+                        {% else %}
+                        <div class="job-detail-salary-range">{{ job.salary_display }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="job-detail-date">Đăng {{ job.created_at.strftime('%d/%m/%Y') }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-8">
+            <!-- Job Description -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Mô tả công việc</h5>
+                </div>
+                <div class="card-body">
+                    {{ job.description | safe }}
+                </div>
+            </div>
+
+            <!-- Requirements -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Yêu cầu</h5>
+                </div>
+                <div class="card-body">
+                    {{ job.requirements | safe }}
+                </div>
+            </div>
+
+            <!-- Benefits -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Quyền lợi</h5>
+                </div>
+                <div class="card-body">
+                    {{ job.benefits | safe }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-4">
+            <!-- Application Form for authenticated users -->
+            {% if current_user.is_authenticated and current_user.role == 'user' %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Ứng tuyển ngay</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('apply_job', job_id=job.id) }}" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="cover_letter" class="form-label">Thư xin việc</label>
+                            <textarea class="form-control" id="cover_letter" name="cover_letter" rows="4" 
+                                    placeholder="Giới thiệu bản thân và lý do bạn phù hợp với vị trí này..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="resume" class="form-label">CV/Resume <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+                            <div class="form-text">Hỗ trợ định dạng: PDF, DOC, DOCX (Tối đa 5MB)</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Nộp đơn ứng tuyển
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Company Info -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Thông tin công ty</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">Tên công ty</h6>
+                        <p>{{ job.company_name }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Địa điểm</h6>
+                        <p>{{ job.location }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Người đăng</h6>
+                        <p>{{ job.alumni.name }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Ngày đăng</h6>
+                        <p>{{ job.created_at.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Thông tin liên hệ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">Email</h6>
+                        <p>{{ job.contact_email }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Điện thoại</h6>
+                        <p>{{ job.contact_phone }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Job detail styling */
+.company-logo-detail {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 12px;
+    margin: 0 auto;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.company-logo-detail img {
+    width: 85%;
+    height: 85%;
+    object-fit: contain;
+}
+
+.job-detail-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+}
+
+.company-detail-name {
+    font-size: 16px;
+    color: #555;
+    font-weight: 500;
+}
+
+.job-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.job-detail-location {
+    color: #0d6efd;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.job-detail-location i {
+    margin-right: 4px;
+}
+
+.job-detail-tag {
+    background: #f5f5f5;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #666;
+}
+
+.job-detail-salary-range {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.job-detail-negotiable {
+    font-size: 18px;
+    font-weight: 700;
+    color: #28a745;
+}
+
+.job-detail-date {
+    font-size: 13px;
+    color: #888;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-header h5 {
+    font-weight: 600;
+    color: #333;
+}
+
+@media (max-width: 992px) {
+    .company-logo-detail {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .job-detail-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .col-md-2, .col-md-7, .col-md-3 {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    
+    .job-detail-meta {
+        justify-content: center;
+    }
+    
+    .col-md-3 {
+        text-align: center;
+    }
+}
+</style>
+{% endblock %} 

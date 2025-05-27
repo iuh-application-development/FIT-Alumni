@@ -11,7 +11,7 @@ Hệ thống không chỉ hỗ trợ việc quản lý dữ liệu cựu sinh vi
 | Họ và tên             | Mã số sinh viên  | Vai trò chính                                                | Mức độ hoàn thành  |
 |-----------------------|------------------|--------------------------------------------------------------|--------------------|
 | Nguyễn Phước Điền     | 21002595         | Phát triển chức năng: Trang chủ, đăng bài, việc làm, profile | 100%               |
-| Lê Thị Thúy Kiều      | 22733091         | Giao diện và chức năng quản lý của Admin, auth, báo cáo      | 100%               |
+| Nguyễn Thị Thúy Kiều  | 22733091         | Giao diện và chức năng quản lý của Admin, auth, báo cáo      | 100%               |
 | Nguyễn Thị Mỹ Duyên   | 22640511         | Thiết kế giao diện, chỉnh sửa HTML/CSS, báo cáo              | 100%               |
 | Lê Hữu Trọng          | 22652671         | Lên ý tưởng thiết kế Slide trình bày và video demo           | 100%               |
 
@@ -118,6 +118,7 @@ http://localhost:5000
 3. Dahri, A.S. et al. (2017). *Design and Development of Alumni Information System* - IJCA.
 4. Roy, S. & Saha, S. (2016). *Web-Based Alumni Information System* - IEEE CSE.
 5. Ngô Văn Tùng (2020). *Ứng dụng hệ thống alumni trong nâng cao chất lượng đào tạo* - Tạp chí Giáo dục.
+
 
 ## Tài nguyên bổ sung
 

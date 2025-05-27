@@ -1,164 +1,1016 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Alumni Network{% endblock %}</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>{% block title %}FIT Alumni{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
     {% block extra_css %}{% endblock %}
+    <style>
+        /* Combined CSS from theme.css and style.css */
+        :root {
+            --primary-color: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --secondary-color: #e2e9f0;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #0dcaf0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --body-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            background-color: var(--body-bg);
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Container width */
+        .container-fluid {
+            padding-left: 0;
+            padding-right: 0;
+            max-width: 100%;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            padding: 0 2rem;
+        }
+
+        /* Image Styles */
+        .hero-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            max-height: 600px;
+            display: block;
+        }
+
+        .banner-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            display: block;
+            border-radius: var(--border-radius);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Typography Improvements */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--dark-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+        }
+
+        h1 { 
+            font-size: 2.5rem; 
+            line-height: 1.2;
+        }
+
+        h2 { 
+            font-size: 2rem;
+            line-height: 1.3;
+        }
+
+        h3 { 
+            font-size: 1.75rem;
+            line-height: 1.4;
+        }
+
+        p, .text-content {
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 1.1rem;
+            text-shadow: 0.5px 0.5px 0.5px rgba(0,0,0,0.05);
+        }
+
+        /* Text Enhancement */
+        .text-primary { color: var(--primary-color) !important; }
+        .text-secondary { color: var(--secondary-color) !important; }
+        .text-success { color: var(--success-color) !important; }
+        .text-danger { color: var(--danger-color) !important; }
+        .text-warning { color: var(--warning-color) !important; }
+
+        .text-bold { font-weight: 600; }
+        .text-medium { font-weight: 500; }
+        .text-normal { font-weight: 400; }
+
+        .text-large { font-size: 1.25rem; }
+        .text-small { font-size: 0.875rem; }
+
+        /* Header Section */
+        .header-section {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .header-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 1.5rem;
+        }
+
+        .header-subtitle {
+            font-size: 1.5rem;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Background Overlay */
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6));
+            z-index: 1;
+        }
+
+        /* Navigation */
+        .navbar {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            padding: 1rem 2rem;
+        }
+
+        .navbar-brand, .navbar-nav .nav-link {
+            color: white !important;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .nav-link {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-color) !important;
+            padding: 0.5rem 1.5rem !important;
+        }
+
+        /* Content Sections */
+        .section {
+            padding: 5rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        /* Card Improvements */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--box-shadow);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .card-img-top {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-text {
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        /* Button styles */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Badge styles */
+        .badge.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        .badge.bg-success {
+            background-color: var(--success-color) !important;
+        }
+
+        .badge.bg-warning {
+            background-color: var(--warning-color) !important;
+            color: var(--dark-color);
+        }
+
+        .badge.bg-danger {
+            background-color: var(--danger-color) !important;
+        }
+
+        /* Table styles */
+        .table {
+            background-color: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+        }
+
+        /* Pagination */
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-link {
+            color: var(--primary-color);
+        }
+
+        .pagination .page-link:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Alert styles */
+        .alert {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: var(--box-shadow);
+        }
+
+        .alert-primary {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .alert-success {
+            background-color: rgba(25, 135, 84, 0.1);
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .alert-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            border-color: var(--warning-color);
+            color: var(--dark-color);
+        }
+
+        /* Form controls */
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .custom-file-input:focus ~ .custom-file-label {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Other components */
+        .progress-bar {
+            background-color: var(--primary-color);
+        }
+
+        .list-group-item.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Modal styles */
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .modal-footer .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .modal-footer .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        /* Dropdown styles */
+        .dropdown-item:active {
+            background-color: var(--primary-color);
+        }
+        
+        /* Nav styles */
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            border-color: var(--border-color) var(--border-color) var(--card-bg);
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            color: var(--primary-color);
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+        }
+
+        .nav-pills .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-item.active {
+            color: var(--primary-color);
+        }
+
+        /* Hover effects */
+        .hover-shadow {
+            transition: all 0.3s ease;
+        }
+
+        .hover-shadow:hover {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .hover-scale {
+            transition: all 0.3s ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+
+        /* Links */
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Footer Styles */
+        footer, .footer {
+            background-color: #212529 !important;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            padding-top: 2.5rem;
+            padding-bottom: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .footer-section {
+            flex: 1;
+            margin-right: 2.5rem;
+        }
+
+        .footer-section:last-child {
+            margin-right: 0;
+        }
+
+        .footer-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.7rem;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer a, .footer-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .footer a:hover, .footer-links a:hover {
+            color: #ccc;
+            text-decoration: none;
+        }
+
+        .footer-description {
+            color: #fff;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .footer-description i {
+            color: #fff;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Job Listing Styles */
+        .job-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .company-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .job-description {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .job-meta {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .job-meta-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-right: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.75rem; }
+            h3 { font-size: 1.5rem; }
+            
+            .header-title {
+                font-size: 2.5rem;
+            }
+            
+            .header-subtitle {
+                font-size: 1.25rem;
+            }
+            
+            .section {
+                padding: 3rem 0;
+            }
+
+            .footer-container {
+                flex-direction: column;
+            }
+
+            .footer-section {
+                margin-right: 0;
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        /* Custom header and navbar styles */
+        .navbar-light {
+            background-color: #f8f9fa !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 1rem;
+        }
+
+        .navbar-brand {
+            padding: 0;
+            margin-right: auto;
+            display: flex;
+            align-items: center;
+            margin-left: 0;
+        }
+
+        .navbar-brand img {
+            max-height: 40px;
+            margin-right: 0.5rem;
+        }
+
+        .navbar-brand div {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .navbar-brand span {
+            font-weight: bold;
+            color: #0d6efd;
+            font-size: 1rem;
+        }
+
+        .navbar-brand small {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+
+        .navbar-nav {
+            align-items: center;
+        }
+
+        .navbar-light .navbar-nav .nav-link {
+            color: #000 !important;
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-light .navbar-nav .nav-link i {
+            margin-right: 0.3rem;
+            font-size: 1rem;
+        }
+
+        .navbar-light .navbar-nav .nav-link:hover,
+        .navbar-light .navbar-nav .nav-link:focus {
+            color: #007bff !important;
+        }
+
+        .navbar-light .navbar-nav .active > .nav-link,
+        .navbar-light .navbar-nav .nav-link.active {
+            color: #007bff !important;
+            font-weight: bold;
+        }
+
+        .navbar-nav .nav-item {
+            margin-left: 0.75rem;
+        }
+
+        .navbar-nav .nav-item:first-child {
+            margin-left: 0;
+        }
+
+        .navbar-nav .dropdown-menu {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-nav .dropdown-item {
+            font-size: 0.9rem;
+            color: #000 !important;
+        }
+
+        .navbar-nav .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #007bff !important;
+        }
+
+        /* Job Listings Styles */
+        .job-listings {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .job-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+            transition: all 0.25s ease;
+            position: relative;
+            border: 1px solid #f0f0f0;
+            overflow: hidden;
+        }
+
+        .job-card:first-child {
+            border-left: 3px solid #28a745;
+        }
+
+        .job-card-highlight {
+            background-color: #f9fff9;
+            border: 1px solid #e6f7e6;
+        }
+
+        .job-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .job-card-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            padding: 16px;
+        }
+
+        .job-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .job-logo {
+            width: 54px;
+            height: 54px;
+            min-width: 54px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 8px;
+        }
+
+        .job-logo img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+        }
+
+        .job-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .job-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .company-name {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .job-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .job-location {
+            color: #0d6efd;
+            margin-right: 4px;
+        }
+
+        .job-location i {
+            margin-right: 4px;
+        }
+
+        .job-tag {
+            background: #f5f5f5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .job-right {
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .job-salary {
+            font-weight: 600;
+            color: #0d6efd;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .job-negotiable {
+            font-weight: 600;
+            color: #28a745;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .job-negotiable i {
+            margin-right: 4px;
+        }
+
+        .job-date {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* Responsive Styles for Job Cards */
+        @media (max-width: 992px) {
+            .job-content {
+                flex-direction: column;
+            }
+            
+            .job-right {
+                text-align: left;
+                margin-top: 12px;
+                min-width: auto;
+            }
+            
+            .job-logo {
+                margin-bottom: 8px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .job-meta {
+                flex-direction: column;
+                gap: 4px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .job-card-link {
+                padding: 12px;
+            }
+            
+            .job-content {
+                gap: 12px;
+            }
+            
+            .job-logo {
+                width: 48px;
+                height: 48px;
+                min-width: 48px;
+            }
+        }
+        
+        /* Hiển thị thông tin lương trong danh sách việc làm và trang chi tiết */
+        .job-right {
+            display: flex !important;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        
+        .job-detail-salary {
+            display: block !important;
+        }
+        
+        /* Chỉ ẩn ngày đăng trong trang chi tiết */
+        .job-detail-date {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
-    <!-- Top Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
-                <i class="fas fa-graduation-cap me-2"></i>
-                Alumni Network
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="https://rubee.com.vn/wp-content/uploads/2021/05/Logo-IUH.jpg" alt="IUH Logo" height="40">
+                <div>
+                    <span>Industrial University of Ho Chi Minh City</span>
+                    <small>Alumni Information Portal</small>
+                </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="fas fa-home me-1"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('profile') }}">
-                            <i class="fas fa-user me-1"></i> Profile
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('connections') }}">
-                            <i class="fas fa-users me-1"></i> Connections
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('jobs') }}">
-                            <i class="fas fa-briefcase me-1"></i> Jobs
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('events') }}">
-                            <i class="fas fa-calendar-alt me-1"></i> Events
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('messages') }}">
-                            <i class="fas fa-envelope me-1"></i> Messages
-                            {% if current_user.received_messages|selectattr('is_read', 'equalto', false)|list|length > 0 %}
-                            <span class="badge bg-danger rounded-pill ms-1">
-                                {{ current_user.received_messages|selectattr('is_read', 'equalto', false)|list|length }}
-                            </span>
-                            {% endif %}
-                        </a>
-                    </li>
-                    {% if current_user.is_admin %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin') }}">
-                            <i class="fas fa-cog me-1"></i> Admin
-                        </a>
-                    </li>
-                    {% endif %}
-                    {% endif %}
-                </ul>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}"><i class="fas fa-home me-1"></i> Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('social_feed') }}"><i class="fas fa-newspaper me-1"></i> Bảng tin</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('jobs') }}"><i class="fas fa-briefcase me-1"></i> Việc làm</a>
+                    </li>
                     {% if current_user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('profile') }}">
-                                <i class="fas fa-user me-2"></i> Profile
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="{{ url_for('confirm_logout') }}">
-                                <i class="fas fa-sign-out-alt me-2"></i> Logout
-                            </a></li>
-                        </ul>
-                    </li>
+                        {% if current_user.role == 'alumni' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('alumni_jobs') }}">
+                                    <i class="fas fa-list me-1"></i> Quản lý tin
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if current_user.role == 'admin' %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="studentDropdown" role="button" aria-expanded="false">
+                                    <i class="fas fa-cogs me-1"></i> Quản trị
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" href="{{ url_for('admin_users') }}"><i class="fas fa-users me-2"></i> Quản lý người dùng</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('admin_jobs') }}"><i class="fas fa-briefcase me-2"></i> Quản lý việc làm</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        {% if current_user.role == 'user' %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="studentDropdown" role="button" aria-expanded="false">
+                                <i class="fas fa-user-graduate me-1"></i> Sinh viên
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="studentDropdown">
+                                    <li><a class="dropdown-item" href="{{ url_for('user_applications') }}"><i class="fas fa-file-alt me-2"></i>Đơn ứng tuyển của tôi</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('user_events') }}"><i class="fas fa-calendar-check me-2"></i>Sự kiện đã đăng ký</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="studentDropdown" role="button" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ current_user.name }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+
+                                <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="fas fa-user me-2"></i> Hồ sơ</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('edit_profile') }}"><i class="fas fa-edit me-2"></i> Chỉnh sửa hồ sơ</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                            </ul>
+                        </li>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">
-                            <i class="fas fa-sign-in-alt me-1"></i> Login
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-outline-light ms-2" href="{{ url_for('register') }}">
-                            <i class="fas fa-user-plus me-1"></i> Register
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt me-1"></i> Đăng nhập</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}"><i class="fas fa-user-plus me-1"></i> Đăng ký</a>
+                        </li>
                     {% endif %}
+                    <li class="nav-item ms-2 d-flex align-items-center">
+                        <div class="dark-mode-toggle" title="Chuyển đổi chế độ tối/sáng"></div>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container mt-5 pt-4">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-            
-            {% block content %}{% endblock %}
-        </div>
+    <main class="container mb-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show fade-in" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="footer mt-auto py-4 bg-light">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5 class="mb-3">About Alumni Network</h5>
-                    <p class="text-muted">Connect with fellow alumni, share experiences, and grow your professional network.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5 class="mb-3">Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="{{ url_for('index') }}" class="text-decoration-none">Home</a></li>
-                        <li><a href="{{ url_for('jobs') }}" class="text-decoration-none">Jobs</a></li>
-                        <li><a href="{{ url_for('events') }}" class="text-decoration-none">Events</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5 class="mb-3">Connect With Us</h5>
-                    <div class="social-links">
-                        <a href="#" class="text-decoration-none me-3"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="text-decoration-none me-3"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-decoration-none me-3"><i class="fab fa-linkedin"></i></a>
-                    </div>
-                </div>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3 class="footer-title">Về Mạng Lưới Cựu Sinh Viên</h3>
+                <p class="footer-description">Kết nối với các cựu sinh viên khác, chia sẻ kinh nghiệm và phát triển mạng lưới chuyên nghiệp của bạn.</p>
             </div>
-            <hr class="my-4">
-            <div class="text-center">
-                <span class="text-muted">© 2025 Alumni Network. All rights reserved.</span>
+            <div class="footer-section">
+                <h3 class="footer-title">Liên Kết Nhanh</h3>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('index') }}">Trang chủ</a></li>
+                    <li><a href="{{ url_for('jobs') }}">Việc làm</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3 class="footer-title">Liên hệ với chúng tôi</h3>
+                <p class="footer-description">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    Trung tâm Kết nối doanh nghiệp và Giới thiệu việc làm - Tầng trệt - Nhà A - 12 Nguyễn Văn Bảo, P.4 Gò Vấp, Thành phố Hồ Chí Minh
+                    <br>
+                    <i class="fas fa-phone me-2"></i>
+                    <strong>0906.620.858</strong>
+                    <br>
+                    <i class="fas fa-phone-alt me-2"></i>
+                    <strong>028. 3985.5789</strong>
+                    <br>
+                    <i class="fas fa-envelope me-2"></i>
+                    <strong>tttv\_htsv@iuh.edu.vn</strong>
+                </p>
             </div>
         </div>
     </footer>
 
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
     {% block extra_js %}{% endblock %}
 </body>
-</html> 
+</html>

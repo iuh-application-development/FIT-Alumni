@@ -1,0 +1,12 @@
+Please add the following company logo files to this directory:
+
+1. beniti.png - Black background logo for BENITI
+2. anson.png - Blue logo for AN SƠN BÌNH DƯƠNG LOGISTICS
+3. chanh-thu.png - Green logo for TÂM CÂN CHÁNH THỨ
+4. trco.png - Blue logo for TRCO HÀ NỘI
+5. hoang-long-vu.png - Logo for VINA HOÀNG LONG VŨ
+6. ekiki.png - Logo for EKIKI CREATION
+7. hct.png - Logo for HCT
+8. dsic.png - Logo for DSIC VIỆT NAM
+
+These logos should be square images, preferably 100x100 pixels or larger. 

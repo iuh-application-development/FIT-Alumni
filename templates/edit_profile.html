@@ -1,0 +1,811 @@
+{% extends 'base.html' %}
+
+{% block title %}Chỉnh sửa hồ sơ - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="position-relative d-inline-block mb-3">
+                            {% if profile and profile.avatar %}
+                            <div class="position-relative">
+                                <!-- Debug đường dẫn avatar -->
+                                <p class="debug text-muted small">Avatar path: {{ profile.avatar }}</p>
+                                <img src="{{ url_for('static', filename='uploads/avatars/' + profile.avatar) }}" 
+                                     alt="Avatar" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;"
+                                     onerror="this.onerror=null; this.src='/static/default-avatar.png';">
+                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0" 
+                                        onclick="removeAvatar()" data-bs-toggle="tooltip" title="Xóa ảnh đại diện"
+                                        style="border-radius: 50%; width: 30px; height: 30px; padding: 0; display: flex; justify-content: center; align-items: center;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <label for="avatar" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm" 
+                                       style="cursor: pointer;" data-bs-toggle="tooltip" title="Thay đổi ảnh đại diện">
+                                    <i class="fas fa-camera text-primary"></i>
+                                    <input type="file" id="avatar" name="avatar" class="d-none" accept="image/png,image/jpeg,image/jpg" onchange="previewImage(this);">
+                                </label>
+                            </div>
+                            {% else %}
+                            <div class="position-relative">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" 
+                                     style="width: 150px; height: 150px;">
+                                    <i class="fas fa-user fa-3x text-muted"></i>
+                                </div>
+                                <label for="avatar" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm" 
+                                       style="cursor: pointer;" data-bs-toggle="tooltip" title="Thêm ảnh đại diện">
+                                    <i class="fas fa-camera text-primary"></i>
+                                    <input type="file" id="avatar" name="avatar" class="d-none" accept="image/png,image/jpeg,image/jpg" onchange="previewImage(this);">
+                                </label>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <h2 class="h3 mb-3">Chỉnh sửa hồ sơ</h2>
+                        <p class="text-muted">Cập nhật thông tin cá nhân của bạn</p>
+                    </div>
+
+                    {% include '_messages.html' %}
+
+                    <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data" id="profileForm">
+                        <!-- Basic Information -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Thông tin cơ bản</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Họ và tên</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input type="text" class="form-control" id="name" name="name" 
+                                               value="{{ current_user.name }}" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                        <input type="email" class="form-control" id="email" name="email" 
+                                               value="{{ current_user.email }}" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Số điện thoại</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                        <input type="tel" class="form-control" id="phone" name="phone" 
+                                               value="{{ profile.phone if profile else '' }}"
+                                               pattern="(84|0[3|5|7|8|9])+([0-9]{8})\b"
+                                               title="Vui lòng nhập số điện thoại hợp lệ (VD: 0912345678 hoặc 84912345678)"
+                                               oninput="validatePhone(this)">
+                                        <div class="invalid-feedback">
+                                            Số điện thoại không hợp lệ
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Địa chỉ</label>
+                                    <div class="input-group position-relative">
+                                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                        <input type="text" class="form-control" id="address" name="address" 
+                                               value="{{ profile.address if profile else '' }}"
+                                               autocomplete="off">
+                                        <span class="position-absolute end-0 bottom-0 mb-1 me-2" style="cursor: pointer; z-index: 10;">
+                                            <i class="fas fa-chevron-down text-muted"></i>
+                                        </span>
+                                        <div id="addressSuggestions" class="position-absolute w-100 bg-white shadow-sm rounded-bottom border" 
+                                             style="display: none; top: 100%; z-index: 1000; max-height: 200px; overflow-y: auto;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="bio" class="form-label">Giới thiệu</label>
+                                    <textarea class="form-control" id="bio" name="bio" rows="3">{{ profile.bio if profile else '' }}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="company" class="form-label">Công ty</label>
+                                    <input type="text" class="form-control" id="company" name="company" 
+                                           value="{{ profile.company if profile else '' }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="position" class="form-label">Vị trí</label>
+                                    <input type="text" class="form-control" id="position" name="position" 
+                                           value="{{ profile.position if profile else '' }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="graduation_year" class="form-label">Năm tốt nghiệp</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-graduation-cap"></i></span>
+                                        <input type="number" class="form-control" id="graduation_year" name="graduation_year" 
+                                               value="{{ profile.graduation_year if profile and profile.graduation_year else '' }}"
+                                               min="1990" max="{{ current_year }}" placeholder="Ví dụ: 2020">
+                                    </div>
+                                    <small class="form-text text-muted">Năm bạn tốt nghiệp đại học</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Education -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Học vấn</h5>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="addEducation()">
+                                    <i class="fas fa-plus"></i> Thêm
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="education-container">
+                                    {% for edu in education %}
+                                    <div class="education-item mb-3">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Trường</label>
+                                                <input type="text" class="form-control" name="school[]" 
+                                                       value="{{ edu.school }}" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Ngành học</label>
+                                                <input type="text" class="form-control" name="major[]" 
+                                                       value="{{ edu.major }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Ngày bắt đầu</label>
+                                                <input type="date" class="form-control" name="edu_start_date[]" 
+                                                       value="{{ edu.start_date.strftime('%Y-%m-%d') if edu.start_date else '' }}" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Ngày kết thúc</label>
+                                                <input type="date" class="form-control" name="edu_end_date[]" 
+                                                       value="{{ edu.end_date.strftime('%Y-%m-%d') if edu.end_date else '' }}" required>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeEducation(this)">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Experience -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Kinh nghiệm làm việc</h5>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="addExperience()">
+                                    <i class="fas fa-plus"></i> Thêm
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="experience-container">
+                                    {% for exp in experience %}
+                                    <div class="experience-item mb-3">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Vị trí</label>
+                                                <input type="text" class="form-control" name="position[]" 
+                                                       value="{{ exp.position }}" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Công ty</label>
+                                                <input type="text" class="form-control" name="company[]" 
+                                                       value="{{ exp.company }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Ngày bắt đầu</label>
+                                                <input type="date" class="form-control" name="exp_start_date[]" 
+                                                       value="{{ exp.start_date.strftime('%Y-%m-%d') if exp.start_date else '' }}" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Ngày kết thúc</label>
+                                                <input type="date" class="form-control" name="exp_end_date[]" 
+                                                       value="{{ exp.end_date.strftime('%Y-%m-%d') if exp.end_date else '' }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Mô tả công việc</label>
+                                            <textarea class="form-control" name="description[]" rows="3">{{ exp.description }}</textarea>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeExperience(this)">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Kỹ năng</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Nhập kỹ năng và nhấn Enter hoặc dấu phẩy</label>
+                                    <div class="d-flex mb-2">
+                                        <div id="skills-input-container" class="form-control flex-grow-1" style="min-height: 40px; height: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; padding: 5px;">
+                                            <input type="text" id="skill-input" class="flex-grow-1" style="border: none; outline: none; min-width: 100px; padding: 5px;" 
+                                                placeholder="Ví dụ: Python, JavaScript,...">
+                                        </div>
+                                        <button type="button" id="add-skill-btn" class="btn btn-primary ms-2">
+                                            <i class="fas fa-plus"></i> Thêm
+                                        </button>
+                                    </div>
+                                    <input type="hidden" name="skills" id="skills-hidden-input" 
+                                           value="{{ skills | map(attribute='name') | join(', ') }}">
+                                    <div class="small text-muted mt-1">
+                                        <i class="fas fa-info-circle"></i> Nhấn Enter hoặc dấu phẩy sau mỗi kỹ năng, hoặc nhấn nút Thêm.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Lưu thay đổi
+                            </button>
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+{{ super() }}
+<style>
+/* Giữ nguyên styles hiện tại */
+.skill-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #0d6efd;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin: 2px;
+    font-size: 0.9em;
+}
+
+.skill-tag span {
+    margin-right: 5px;
+}
+
+.skill-tag .remove-tag {
+    cursor: pointer;
+    margin-left: 5px;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* Thêm style để ẩn debug nếu không cần */
+.debug {
+    display: none; /* Ẩn debug, chỉ bật khi cần */
+}
+</style>
+<script>
+function previewImage(input) {
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const container = input.closest('.position-relative');
+    
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        console.log("File selected:", file.name, "Type:", file.type, "Size:", file.size);
+
+        // Kiểm tra định dạng file
+        if (!validTypes.includes(file.type)) {
+            showAlert(container, 'danger', 'Vui lòng chọn file ảnh (PNG, JPG, JPEG)');
+            input.value = '';
+            return;
+        }
+        
+        // Kiểm tra kích thước file
+        if (file.size > maxSize) {
+            showAlert(container, 'danger', 'Kích thước file không được vượt quá 5MB');
+            input.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            console.log("Preview URL:", e.target.result);
+            const currentImage = container.querySelector('img');
+            const defaultAvatar = container.querySelector('.rounded-circle.bg-light');
+            
+            // Hiển thị xem trước hình ảnh
+            if (currentImage) {
+                currentImage.src = e.target.result;
+            } else if (defaultAvatar) {
+                const newImage = document.createElement('img');
+                newImage.src = e.target.result;
+                newImage.alt = 'Avatar';
+                newImage.className = 'rounded-circle';
+                newImage.style.width = '150px';
+                newImage.style.height = '150px';
+                newImage.style.objectFit = 'cover';
+                newImage.onerror = function() {
+                    this.src = '/static/default-avatar.png'; // Ảnh mặc định nếu lỗi
+                };
+                defaultAvatar.replaceWith(newImage);
+                
+                // Thêm nút xóa
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'btn btn-sm btn-danger position-absolute top-0 end-0';
+                removeButton.style.borderRadius = '50%';
+                removeButton.style.width = '30px';
+                removeButton.style.height = '30px';
+                removeButton.style.padding = '0';
+                removeButton.style.display = 'flex';
+                removeButton.style.justifyContent = 'center';
+                removeButton.style.alignItems = 'center';
+                removeButton.setAttribute('data-bs-toggle', 'tooltip');
+                removeButton.setAttribute('title', 'Xóa ảnh đại diện');
+                removeButton.onclick = removeAvatar;
+                removeButton.innerHTML = '<i class="fas fa-times"></i>';
+                container.appendChild(removeButton);
+                
+                // Khởi tạo lại tooltip
+                new bootstrap.Tooltip(removeButton);
+            }
+            
+            // Hiển thị thông báo đang tải
+            const loadingMsg = showAlert(container, 'info', '<i class="fas fa-spinner fa-spin me-2"></i>Đang tải lên...');
+            
+            // Tạo form và gửi file avatar
+            const formData = new FormData();
+            formData.append('avatar', file);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (csrfToken) {
+                formData.append('csrf_token', csrfToken);
+            }
+            
+            fetch('{{ url_for("update_avatar") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log("Upload response status:", response.status);
+                if (!response.ok) throw new Error(`Lỗi server: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log("Upload response data:", data);
+                loadingMsg.remove();
+                if (data.success) {
+                    showAlert(container, 'success', `<i class="fas fa-check-circle me-2"></i>${data.message}`, 3000);
+                } else {
+                    throw new Error(data.message || 'Có lỗi xảy ra');
+                }
+            })
+            .catch(error => {
+                console.error("Upload error:", error);
+                loadingMsg.remove();
+                showAlert(container, 'danger', `<i class="fas fa-exclamation-circle me-2"></i>${error.message || 'Có lỗi xảy ra khi cập nhật ảnh đại diện'}`, 5000);
+            });
+        };
+        reader.readAsDataURL(file);
+    } else {
+        console.warn("No file selected");
+    }
+}
+
+function showAlert(container, type, message, autoHide) {
+    const alertBox = document.createElement('div');
+    alertBox.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+    alertBox.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    container.parentNode.appendChild(alertBox);
+    
+    if (autoHide) {
+        setTimeout(() => {
+            alertBox.remove();
+        }, autoHide);
+    }
+    
+    return alertBox;
+}
+
+function removeAvatar() {
+    if (!confirm('Bạn có chắc chắn muốn xóa ảnh đại diện?')) {
+        return;
+    }
+    
+    const container = document.querySelector('.position-relative');
+    const loadingMsg = showAlert(container, 'info', '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...');
+    
+    const headers = {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json'
+    };
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (csrfToken) {
+        headers['X-CSRF-Token'] = csrfToken;
+    }
+    
+    fetch('{{ url_for("remove_avatar") }}', {
+        method: 'POST',
+        headers: headers
+    })
+    .then(response => {
+        console.log("Remove response status:", response.status);
+        if (!response.ok) throw new Error(`Lỗi server: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        console.log("Remove response data:", data);
+        loadingMsg.remove();
+        if (data.success) {
+            const avatarContainer = document.querySelector('.position-relative.d-inline-block.mb-3');
+            avatarContainer.innerHTML = `
+                <div class="position-relative">
+                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" 
+                         style="width: 150px; height: 150px;">
+                        <i class="fas fa-user fa-3x text-muted"></i>
+                    </div>
+                    <label for="avatar" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm" 
+                           style="cursor: pointer;" data-bs-toggle="tooltip" title="Thêm ảnh đại diện">
+                        <i class="fas fa-camera text-primary"></i>
+                        <input type="file" id="avatar" name="avatar" class="d-none" accept="image/png,image/jpeg,image/jpg" onchange="previewImage(this);">
+                    </label>
+                </div>
+            `;
+            
+            // Khởi tạo lại tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            showAlert(container, 'success', `<i class="fas fa-check-circle me-2"></i>${data.message}`, 3000);
+        } else {
+            throw new Error(data.message || 'Có lỗi xảy ra');
+        }
+    })
+    .catch(error => {
+        console.error("Remove error:", error);
+        loadingMsg.remove();
+        showAlert(container, 'danger', `<i class="fas fa-exclamation-circle me-2"></i>${error.message || 'Có lỗi xảy ra khi xóa ảnh đại diện'}`, 5000);
+    });
+}
+
+function addEducation() {
+    const container = document.getElementById('education-container');
+    const newItem = document.createElement('div');
+    newItem.className = 'education-item mb-3';
+    newItem.innerHTML = `
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Trường</label>
+                <input type="text" class="form-control" name="school[]" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Ngành học</label>
+                <input type="text" class="form-control" name="major[]" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Ngày bắt đầu</label>
+                <input type="date" class="form-control" name="edu_start_date[]" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Ngày kết thúc</label>
+                <input type="date" class="form-control" name="edu_end_date[]" required>
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger" onclick="removeEducation(this)">
+            <i class="fas fa-trash"></i> Xóa
+        </button>
+    `;
+    container.appendChild(newItem);
+}
+
+function addExperience() {
+    const container = document.getElementById('experience-container');
+    const newItem = document.createElement('div');
+    newItem.className = 'experience-item mb-3';
+    newItem.innerHTML = `
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Vị trí</label>
+                <input type="text" class="form-control" name="position[]" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Công ty</label>
+                <input type="text" class="form-control" name="company[]" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Ngày bắt đầu</label>
+                <input type="date" class="form-control" name="exp_start_date[]" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Ngày kết thúc</label>
+                <input type="date" class="form-control" name="exp_end_date[]" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mô tả công việc</label>
+            <textarea class="form-control" name="description[]" rows="3"></textarea>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger" onclick="removeExperience(this)">
+            <i class="fas fa-trash"></i> Xóa
+        </button>
+    `;
+    container.appendChild(newItem);
+}
+
+function removeEducation(button) {
+    button.closest('.education-item').remove();
+}
+
+function removeExperience(button) {
+    button.closest('.experience-item').remove();
+}
+
+function validatePhone(input) {
+    const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+    const isValid = phoneRegex.test(input.value);
+    
+    if (isValid) {
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+    } else {
+        input.classList.remove('is-valid');
+        input.classList.add('is-invalid');
+    }
+}
+
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    const phoneInput = document.getElementById('phone');
+    const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+    
+    if (phoneInput.value && !phoneRegex.test(phoneInput.value)) {
+        e.preventDefault();
+        phoneInput.classList.add('is-invalid');
+        phoneInput.focus();
+    }
+});
+
+const VIETNAM_PROVINCES = [
+    'Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ',
+    'An Giang', 'Bà Rịa - Vũng Tàu', 'Bắc Giang', 'Bắc Kạn', 'Bạc Liêu',
+    'Bắc Ninh', 'Bến Tre', 'Bình Định', 'Bình Dương', 'Bình Phước',
+    'Bình Thuận', 'Cà Mau', 'Cao Bằng', 'Đắk Lắk', 'Đắk Nông',
+    'Điện Biên', 'Đồng Nai', 'Đồng Tháp', 'Gia Lai', 'Hà Giang',
+    'Hà Nam', 'Hà Tĩnh', 'Hải Dương', 'Hậu Giang', 'Hòa Bình',
+    'Hưng Yên', 'Khánh Hòa', 'Kiên Giang', 'Kon Tum', 'Lai Châu',
+    'Lâm Đồng', 'Lạng Sơn', 'Lào Cai', 'Long An', 'Nam Định',
+    'Nghệ An', 'Ninh Bình', 'Ninh Thuận', 'Phú Thọ', 'Phú Yên',
+    'Quảng Bình', 'Quảng Nam', 'Quảng Ngãi', 'Quảng Ninh', 'Quảng Trị',
+    'Sóc Trăng', 'Sơn La', 'Tây Ninh', 'Thái Bình', 'Thái Nguyên',
+    'Thanh Hóa', 'Thừa Thiên Huế', 'Tiền Giang', 'Trà Vinh', 'Tuyên Quang',
+    'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái'
+];
+
+const addressInput = document.getElementById('address');
+const addressSuggestions = document.getElementById('addressSuggestions');
+let currentFocus = -1;
+
+addressInput.addEventListener('input', function(e) {
+    const value = this.value.toLowerCase();
+    let suggestions = '';
+    
+    if (value.length > 0) {
+        const matches = VIETNAM_PROVINCES.filter(province => 
+            province.toLowerCase().includes(value)
+        );
+        
+        if (matches.length > 0) {
+            suggestions = matches
+                .map((match, index) => `<div class="suggestion-item p-2" data-index="${index}">${match}</div>`)
+                .join('');
+            addressSuggestions.innerHTML = suggestions;
+            addressSuggestions.style.display = 'block';
+            
+            const items = addressSuggestions.getElementsByClassName('suggestion-item');
+            Array.from(items).forEach(item => {
+                item.addEventListener('click', function() {
+                    addressInput.value = this.textContent;
+                    addressSuggestions.style.display = 'none';
+                });
+                
+                item.addEventListener('mouseover', function() {
+                    currentFocus = parseInt(this.dataset.index);
+                    removeActive();
+                    this.classList.add('active');
+                });
+            });
+        } else {
+            addressSuggestions.style.display = 'none';
+        }
+    } else {
+        addressSuggestions.style.display = 'none';
+    }
+});
+
+addressInput.addEventListener('keydown', function(e) {
+    const items = addressSuggestions.getElementsByClassName('suggestion-item');
+    if (items.length === 0) return;
+    
+    if (e.keyCode === 40) {
+        currentFocus++;
+        if (currentFocus >= items.length) currentFocus = 0;
+        removeActive();
+        items[currentFocus].classList.add('active');
+        items[currentFocus].scrollIntoView({ block: 'nearest' });
+    }
+    else if (e.keyCode === 38) {
+        currentFocus--;
+        if (currentFocus < 0) currentFocus = items.length - 1;
+        removeActive();
+        items[currentFocus].classList.add('active');
+        items[currentFocus].scrollIntoView({ block: 'nearest' });
+    }
+    else if (e.keyCode === 13 && currentFocus > -1) {
+        e.preventDefault();
+        if (items[currentFocus]) {
+            addressInput.value = items[currentFocus].textContent;
+            addressSuggestions.style.display = 'none';
+        }
+    }
+});
+
+function removeActive() {
+    const items = addressSuggestions.getElementsByClassName('suggestion-item');
+    Array.from(items).forEach(item => item.classList.remove('active'));
+}
+
+document.addEventListener('click', function(e) {
+    if (!addressInput.contains(e.target) && !addressSuggestions.contains(e.target)) {
+        addressSuggestions.style.display = 'none';
+    }
+});
+
+const style = document.createElement('style');
+style.textContent = `
+    .suggestion-item {
+        cursor: pointer;
+    }
+    .suggestion-item:hover,
+    .suggestion-item.active {
+        background-color: #f8f9fa;
+    }
+`;
+document.head.appendChild(style);
+
+const skillsContainer = document.getElementById('skills-input-container');
+const skillInput = document.getElementById('skill-input');
+const skillsHiddenInput = document.getElementById('skills-hidden-input');
+let skills = [];
+
+function initializeSkills() {
+    const initialValue = skillsHiddenInput.value;
+    if (initialValue) {
+        skills = initialValue.split(',').map(s => s.trim()).filter(s => s);
+    }
+    renderSkills();
+}
+
+function renderSkills() {
+    Array.from(skillsContainer.children).forEach(child => {
+        if (child.id !== 'skill-input') {
+            skillsContainer.removeChild(child);
+        }
+    });
+
+    skills.forEach((skill, index) => {
+        const tag = createTagElement(skill, index);
+        skillsContainer.insertBefore(tag, skillInput);
+    });
+    
+    updateHiddenInput();
+}
+
+function createTagElement(skill, index) {
+    const tag = document.createElement('div');
+    tag.className = 'skill-tag';
+    
+    const text = document.createElement('span');
+    text.textContent = skill;
+    tag.appendChild(text);
+    
+    const removeBtn = document.createElement('span');
+    removeBtn.className = 'remove-tag';
+    removeBtn.textContent = '×';
+    removeBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeSkill(index);
+    };
+    tag.appendChild(removeBtn);
+    
+    return tag;
+}
+
+function addSkill(skill) {
+    const trimmedSkill = skill.trim();
+    if (trimmedSkill && !skills.includes(trimmedSkill)) {
+        skills.push(trimmedSkill);
+        renderSkills();
+    }
+}
+
+function removeSkill(index) {
+    if (index >= 0 && index < skills.length) {
+        skills.splice(index, 1);
+        renderSkills();
+    }
+}
+
+function updateHiddenInput() {
+    skillsHiddenInput.value = skills.join(', ');
+}
+
+skillInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        if (skillInput.value.trim()) {
+            addSkill(skillInput.value);
+            skillInput.value = '';
+        }
+    }
+    else if (e.key === 'Backspace' && skillInput.value === '' && skills.length > 0) {
+        removeSkill(skills.length - 1);
+    }
+});
+
+skillInput.addEventListener('blur', () => {
+    if (skillInput.value.trim()) {
+        addSkill(skillInput.value);
+        skillInput.value = '';
+    }
+});
+
+skillsContainer.addEventListener('click', () => {
+    skillInput.focus();
+});
+
+document.getElementById('add-skill-btn').addEventListener('click', () => {
+    if (skillInput.value.trim()) {
+        addSkill(skillInput.value);
+        skillInput.value = '';
+        skillInput.focus();
+    }
+});
+
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    if (skillInput.value.trim()) {
+        addSkill(skillInput.value);
+        skillInput.value = '';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    initializeSkills();
+});
+</script>
+{% endblock %}
+{% endblock %}

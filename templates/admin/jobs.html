@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý việc làm - FIT Alumni{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    .job-card {
+        transition: all 0.2s ease;
+        border-left: 4px solid transparent;
+    }
+    .job-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    .job-card.pending {
+        border-left-color: #ffc107;
+    }
+    .job-card.approved {
+        border-left-color: #198754;
+    }
+    .company-logo {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        border-radius: 0;
+        border-bottom: 3px solid transparent;
+        font-weight: 600;
+        color: #6c757d;
+        padding: 0.75rem 1.5rem;
+    }
+    .nav-tabs .nav-link.active {
+        border-bottom-color: var(--primary-color);
+        color: var(--primary-color);
+        background-color: transparent;
+    }
+    .nav-tabs .nav-link:hover:not(.active) {
+        border-bottom-color: #dee2e6;
+    }
+    .search-container {
+        position: relative;
+    }
+    .search-container .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        color: #6c757d;
+    }
+    .search-container input {
+        padding-left: 40px;
+        border-radius: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Quản lý việc làm</h2>
+            <p class="text-muted">Xem và quản lý tất cả việc làm trong hệ thống</p>
+        </div>
+        <div class="search-container">
+            <form class="d-flex" method="GET">
+                <div class="search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <input type="text" name="search" class="form-control me-2" 
+                       placeholder="Tìm kiếm công việc..." 
+                       value="{{ request.args.get('search', '') }}">
+                <button type="submit" class="btn btn-primary px-4">Tìm kiếm</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card card bg-primary text-white h-100 py-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-white">Tổng việc làm</h5>
+                            <h2 class="display-6 fw-bold mb-0">{{ jobs|length }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                            <i class="fas fa-briefcase fa-2x text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card card bg-warning text-white h-100 py-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-white">Chờ duyệt</h5>
+                            <h2 class="display-6 fw-bold mb-0">{{ jobs|selectattr('is_confirmed', 'equalto', False)|list|length }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                            <i class="fas fa-hourglass-half fa-2x text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card card bg-success text-white h-100 py-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-white">Đã duyệt</h5>
+                            <h2 class="display-6 fw-bold mb-0">{{ jobs|selectattr('is_confirmed', 'equalto', True)|list|length }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                            <i class="fas fa-check-circle fa-2x text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card card bg-info text-white h-100 py-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-white">Công ty</h5>
+                            <h2 class="display-6 fw-bold mb-0">{{ jobs|map(attribute='company_name')|unique|list|length }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-white bg-opacity-25 p-3">
+                            <i class="fas fa-building fa-2x text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs with counters -->
+    <ul class="nav nav-tabs mb-4" id="jobsTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active d-flex align-items-center" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+                <i class="fas fa-hourglass-half me-2"></i>
+                Chờ duyệt 
+                <span class="badge bg-warning rounded-pill ms-2">{{ jobs|selectattr('is_confirmed', 'equalto', False)|list|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link d-flex align-items-center" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab">
+                <i class="fas fa-check-circle me-2"></i>
+                Đã duyệt 
+                <span class="badge bg-success rounded-pill ms-2">{{ jobs|selectattr('is_confirmed', 'equalto', True)|list|length }}</span>
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content with enhanced cards -->
+    <div class="tab-content" id="jobsTabContent">
+        <!-- Pending Jobs -->
+        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-hourglass-half me-2 text-warning"></i>Việc làm chờ duyệt</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Công việc</th>
+                                    <th>Người đăng</th>
+                                    <th>Ngày đăng</th>
+                                    <th class="text-end pe-4">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in jobs if not job.is_confirmed %}
+                                    <tr class="job-card pending">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                {% if job.company_logo %}
+                                                    <img src="{{ url_for('static', filename='uploads/company_logos/' + job.company_logo) }}" 
+                                                         alt="{{ job.company_name }}" class="company-logo me-3">
+                                                {% else %}
+                                                    <div class="company-logo me-3">
+                                                        {{ job.company_name[:1].upper() }}
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="fw-bold mb-0">{{ job.title }}</h6>
+                                                    <div class="text-muted small">{{ job.company_name }}</div>
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-light text-dark me-1">
+                                                            <i class="fas fa-map-marker-alt me-1 text-danger"></i>{{ job.location }}
+                                                        </span>
+                                                        <span class="badge bg-light text-dark">
+                                                            <i class="fas fa-code me-1 text-primary"></i>{{ job.job_type }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if job.alumni.profile and job.alumni.profile.avatar %}
+                                                    <img src="{{ url_for('static', filename='uploads/avatars/' + job.alumni.profile.avatar) }}" 
+                                                         alt="{{ job.alumni.name }}" class="rounded-circle me-2" width="32" height="32">
+                                                {% else %}
+                                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" 
+                                                         style="width:32px;height:32px;font-size:12px;">
+                                                        {{ job.alumni.name[:1].upper() }}
+                                                    </div>
+                                                {% endif %}
+                                                {{ job.alumni.name }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <i class="far fa-clock me-1 text-muted"></i>
+                                            {{ job.created_at.strftime('%d/%m/%Y') }}
+                                            <div class="text-muted small">{{ job.created_at.strftime('%H:%M') }}</div>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-sm btn-outline-primary me-1">
+                                                <i class="fas fa-eye me-1"></i>Xem
+                                            </a>
+                                            <form action="{{ url_for('admin_confirm_job', job_id=job.id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-success me-1">
+                                                    <i class="fas fa-check me-1"></i>Duyệt
+                                                </button>
+                                            </form>
+                                            <form action="{{ url_for('admin_delete_job', job_id=job.id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="return confirm('Bạn có chắc chắn muốn xóa tin tuyển dụng {{ job.title }}?')">
+                                                    <i class="fas fa-trash-alt me-1"></i>Xóa
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5">
+                                            <div class="py-5">
+                                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                                <h5>Không có tin tuyển dụng nào chờ duyệt</h5>
+                                                <p class="text-muted">Tất cả tin tuyển dụng đã được duyệt</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approved Jobs -->
+        <div class="tab-pane fade" id="approved" role="tabpanel">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-check-circle me-2 text-success"></i>Việc làm đã duyệt</h5>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                            <i class="fas fa-filter me-1"></i>Lọc
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                            <i class="fas fa-download me-1"></i>Xuất
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Công việc</th>
+                                    <th>Người đăng</th>
+                                    <th>Ngày đăng</th>
+                                    <th class="text-end pe-4">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in jobs if job.is_confirmed %}
+                                    <tr class="job-card approved">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                {% if job.company_logo %}
+                                                    <img src="{{ url_for('static', filename='uploads/company_logos/' + job.company_logo) }}" 
+                                                         alt="{{ job.company_name }}" class="company-logo me-3">
+                                                {% else %}
+                                                    <div class="company-logo me-3">
+                                                        {{ job.company_name[:1].upper() }}
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="fw-bold mb-0">{{ job.title }}</h6>
+                                                    <div class="text-muted small">{{ job.company_name }}</div>
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-light text-dark me-1">
+                                                            <i class="fas fa-map-marker-alt me-1 text-danger"></i>{{ job.location }}
+                                                        </span>
+                                                        <span class="badge bg-light text-dark">
+                                                            <i class="fas fa-code me-1 text-primary"></i>{{ job.job_type }}
+                                                        </span>
+                                                        {% if job.deadline %}
+                                                            <span class="badge {% if job.deadline.replace(tzinfo=None) < now.replace(tzinfo=None) %}bg-danger{% else %}bg-success{% endif %} ms-1">
+                                                                <i class="fas fa-calendar-day me-1"></i>
+                                                                {{ job.deadline.strftime('%d/%m/%Y') }}
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if job.alumni.profile and job.alumni.profile.avatar %}
+                                                    <img src="{{ url_for('static', filename='uploads/avatars/' + job.alumni.profile.avatar) }}" 
+                                                         alt="{{ job.alumni.name }}" class="rounded-circle me-2" width="32" height="32">
+                                                {% else %}
+                                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" 
+                                                         style="width:32px;height:32px;font-size:12px;">
+                                                        {{ job.alumni.name[:1].upper() }}
+                                                    </div>
+                                                {% endif %}
+                                                {{ job.alumni.name }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <i class="far fa-clock me-1 text-muted"></i>
+                                            {{ job.created_at.strftime('%d/%m/%Y') }}
+                                            <div class="text-muted small">{{ job.created_at.strftime('%H:%M') }}</div>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-sm btn-outline-primary me-1">
+                                                <i class="fas fa-eye me-1"></i>Xem
+                                            </a>
+                                            <form action="{{ url_for('admin_delete_job', job_id=job.id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="return confirm('Bạn có chắc chắn muốn xóa tin tuyển dụng {{ job.title }}?')">
+                                                    <i class="fas fa-trash-alt me-1"></i>Xóa
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5">
+                                            <div class="py-5">
+                                                <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
+                                                <h5 class="text-muted">Chưa có tin tuyển dụng nào được duyệt</h5>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination - for future use when implementing pagination -->
+    <div class="d-flex justify-content-center mt-4">
+        <nav>
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %} 

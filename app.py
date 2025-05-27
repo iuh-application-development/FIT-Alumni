@@ -563,29 +563,21 @@ def alumni_add_job():
             salary_display = None
             if request.form.get('salary_negotiable'):
                 salary_display = 'Thương lượng'
+            elif request.form.get('custom_salary'):
+                # Sử dụng giá trị từ trường nhập tùy ý
+                salary_display = request.form.get('custom_salary')
             else:
-                salary_min = request.form.get('salary_min', '').replace(',', '')
-                salary_max = request.form.get('salary_max', '').replace(',', '')
+                salary_min = request.form.get('salary_min', '')
+                salary_max = request.form.get('salary_max', '')
                 currency = request.form.get('salary_currency', 'VND')
                 
                 if salary_min and salary_max:
-                    if not salary_min.isdigit() or not salary_max.isdigit():
-                        flash('Mức lương phải là số', 'danger')
-                        return render_template('alumni/add_job.html', form=form, job_types=JOB_TYPES, levels=LEVELS, work_types=WORK_TYPES)
-                    if int(salary_min) > int(salary_max):
-                        flash('Mức lương tối thiểu không được lớn hơn mức lương tối đa', 'danger')
-                        return render_template('alumni/add_job.html', form=form, job_types=JOB_TYPES, levels=LEVELS, work_types=WORK_TYPES)
-                    salary_display = f"{int(salary_min):,} - {int(salary_max):,} {currency}"
+                    # Không kiểm tra số nữa, chấp nhận giá trị tùy ý
+                    salary_display = f"{salary_min} - {salary_max} {currency}"
                 elif salary_min:
-                    if not salary_min.isdigit():
-                        flash('Mức lương phải là số', 'danger')
-                        return render_template('alumni/add_job.html', form=form, job_types=JOB_TYPES, levels=LEVELS, work_types=WORK_TYPES)
-                    salary_display = f"Từ {int(salary_min):,} {currency}"
+                    salary_display = f"Từ {salary_min} {currency}"
                 elif salary_max:
-                    if not salary_max.isdigit():
-                        flash('Mức lương phải là số', 'danger')
-                        return render_template('alumni/add_job.html', form=form, job_types=JOB_TYPES, levels=LEVELS, work_types=WORK_TYPES)
-                    salary_display = f"Đến {int(salary_max):,} {currency}"
+                    salary_display = f"Đến {salary_max} {currency}"
             
             # Xử lý deadline
             deadline = None
@@ -1015,17 +1007,20 @@ def edit_job(job_id):
             salary_display = None
             if form.salary_negotiable.data:
                 salary_display = 'Thương lượng'
+            elif request.form.get('custom_salary'):
+                # Sử dụng giá trị từ trường nhập tùy ý
+                salary_display = request.form.get('custom_salary')
             else:
-                salary_min = form.salary_min.data.replace(',', '') if form.salary_min.data else ''
-                salary_max = form.salary_max.data.replace(',', '') if form.salary_max.data else ''
+                salary_min = form.salary_min.data if form.salary_min.data else ''
+                salary_max = form.salary_max.data if form.salary_max.data else ''
                 currency = form.salary_currency.data
                 
                 if salary_min and salary_max:
-                    salary_display = f"{int(salary_min):,} - {int(salary_max):,} {currency}"
+                    salary_display = f"{salary_min} - {salary_max} {currency}"
                 elif salary_min:
-                    salary_display = f"Từ {int(salary_min):,} {currency}"
+                    salary_display = f"Từ {salary_min} {currency}"
                 elif salary_max:
-                    salary_display = f"Đến {int(salary_max):,} {currency}"
+                    salary_display = f"Đến {salary_max} {currency}"
             
             # Cập nhật thông tin job
             form.populate_obj(job)

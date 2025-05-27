@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý đăng ký - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm mb-4 fade-in">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Quản lý đăng ký tham gia</h4>
+                    <div>
+                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-light me-2">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại sự kiện
+                        </a>
+                        <button class="btn btn-light" id="exportBtn">
+                            <i class="fas fa-download me-2"></i>Xuất danh sách
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Event Summary -->
+                    <div class="row mb-4">
+                        <div class="col-lg-8">
+                            <h5 class="mb-3">{{ event.title }}</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                        <strong>Thời gian:</strong> {{ event.start_time.strftime('%d/%m/%Y %H:%M') }}
+                                        {% if event.end_time %}
+                                        - {{ event.end_time.strftime('%d/%m/%Y %H:%M') }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                        <strong>Địa điểm:</strong> {{ event.location }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <i class="fas fa-users text-success me-2"></i>
+                                        <strong>Đăng ký:</strong> {{ registrations|length }}
+                                        {% if event.capacity %}
+                                        / {{ event.capacity }}
+                                        ({{ (registrations|length / event.capacity * 100)|round }}%)
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="fas fa-chart-pie text-info me-2"></i>
+                                        <strong>Trạng thái:</strong>
+                                        {% set registered_count = registrations|selectattr('status', 'equalto', 'registered')|list|length %}
+                                        {% set attended_count = registrations|selectattr('status', 'equalto', 'attended')|list|length %}
+                                        {% set canceled_count = registrations|selectattr('status', 'equalto', 'canceled')|list|length %}
+                                        <span class="badge bg-success me-1">{{ registered_count }} đăng ký</span>
+                                        <span class="badge bg-primary me-1">{{ attended_count }} tham gia</span>
+                                        <span class="badge bg-danger">{{ canceled_count }} hủy</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0">Thống kê đăng ký</h6>
+                                        <span class="badge bg-primary rounded-pill">{{ registrations|length }}</span>
+                                    </div>
+                                    <!-- Chart would go here in a real application -->
+                                    <div class="progress mb-2" style="height: 25px;">
+                                        {% set total = registrations|length %}
+                                        {% set registered_percent = (registered_count / total * 100)|round if total > 0 else 0 %}
+                                        {% set attended_percent = (attended_count / total * 100)|round if total > 0 else 0 %}
+                                        {% set canceled_percent = (canceled_count / total * 100)|round if total > 0 else 0 %}
+                                        
+                                        <div class="progress-bar bg-success" 
+                                             role="progressbar" 
+                                             style="width: {{ registered_percent }}%" 
+                                             aria-valuenow="{{ registered_percent }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100"
+                                             title="Đã đăng ký: {{ registered_count }} ({{ registered_percent }}%)">
+                                            {{ registered_percent }}%
+                                        </div>
+                                        <div class="progress-bar bg-primary" 
+                                             role="progressbar" 
+                                             style="width: {{ attended_percent }}%" 
+                                             aria-valuenow="{{ attended_percent }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100"
+                                             title="Đã tham gia: {{ attended_count }} ({{ attended_percent }}%)">
+                                            {{ attended_percent }}%
+                                        </div>
+                                        <div class="progress-bar bg-danger" 
+                                             role="progressbar" 
+                                             style="width: {{ canceled_percent }}%" 
+                                             aria-valuenow="{{ canceled_percent }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100"
+                                             title="Đã hủy: {{ canceled_count }} ({{ canceled_percent }}%)">
+                                            {{ canceled_percent }}%
+                                        </div>
+                                    </div>
+                                    <div class="small">
+                                        <span class="text-success">■</span> Đã đăng ký: {{ registered_count }} ({{ registered_percent }}%)<br>
+                                        <span class="text-primary">■</span> Đã tham gia: {{ attended_count }} ({{ attended_percent }}%)<br>
+                                        <span class="text-danger">■</span> Đã hủy: {{ canceled_count }} ({{ canceled_percent }}%)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filters -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <form action="{{ url_for('event_registrations', event_id=event.id) }}" method="GET" class="row g-3">
+                                        <div class="col-md-5">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <i class="fas fa-search text-muted"></i>
+                                                </span>
+                                                <input type="text" class="form-control border-start-0" 
+                                                       name="search" placeholder="Tìm kiếm tên hoặc email..."
+                                                       value="{{ request.args.get('search', '') }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select name="status" class="form-select">
+                                                <option value="">Tất cả trạng thái</option>
+                                                <option value="registered" {% if request.args.get('status') == 'registered' %}selected{% endif %}>Đã đăng ký</option>
+                                                <option value="attended" {% if request.args.get('status') == 'attended' %}selected{% endif %}>Đã tham gia</option>
+                                                <option value="canceled" {% if request.args.get('status') == 'canceled' %}selected{% endif %}>Đã hủy</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="fas fa-filter me-2"></i>Lọc
+                                            </button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="{{ url_for('event_registrations', event_id=event.id) }}" class="btn btn-outline-secondary w-100">
+                                                <i class="fas fa-redo me-2"></i>Đặt lại
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Registrations Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="registrationsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Người đăng ký</th>
+                                    <th>Email</th>
+                                    <th>Thời gian đăng ký</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if registrations %}
+                                    {% for registration in registrations %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if registration.user.profile and registration.user.profile.avatar %}
+                                                <img src="{{ url_for('uploaded_file', filename=registration.user.profile.avatar) }}" 
+                                                     class="rounded-circle me-2" 
+                                                     alt="{{ registration.user.name }}"
+                                                     width="40" height="40">
+                                                {% else %}
+                                                <div class="bg-light rounded-circle me-2 d-flex align-items-center justify-content-center" 
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-user text-primary"></i>
+                                                </div>
+                                                {% endif %}
+                                                <div>
+                                                    <div class="fw-bold">{{ registration.user.name }}</div>
+                                                    {% if registration.user.profile %}
+                                                    <div class="small text-muted">
+                                                        {% if registration.user.profile.phone %}
+                                                        <i class="fas fa-phone-alt me-1"></i>{{ registration.user.profile.phone }}
+                                                        {% endif %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ registration.user.email }}</td>
+                                        <td>{{ registration.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                        <td>
+                                            <div class="status-badge" data-registration-id="{{ registration.id }}">
+                                                {% if registration.status == 'registered' %}
+                                                <span class="badge bg-success">Đã đăng ký</span>
+                                                {% elif registration.status == 'attended' %}
+                                                <span class="badge bg-primary">Đã tham gia</span>
+                                                {% elif registration.status == 'canceled' %}
+                                                <span class="badge bg-danger">Đã hủy</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-outline-success update-status" 
+                                                        data-registration-id="{{ registration.id }}" 
+                                                        data-status="registered"
+                                                        title="Đánh dấu đã đăng ký">
+                                                    <i class="fas fa-clipboard-check"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary update-status" 
+                                                        data-registration-id="{{ registration.id }}" 
+                                                        data-status="attended"
+                                                        title="Đánh dấu đã tham gia">
+                                                    <i class="fas fa-user-check"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger update-status" 
+                                                        data-registration-id="{{ registration.id }}" 
+                                                        data-status="canceled"
+                                                        title="Đánh dấu đã hủy">
+                                                    <i class="fas fa-times-circle"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                                            <h5>Chưa có người đăng ký tham gia sự kiện</h5>
+                                            <p class="text-muted">Danh sách đăng ký sẽ xuất hiện khi có người đăng ký tham gia sự kiện này</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'))
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+    
+    // Update registration status
+    document.querySelectorAll('.update-status').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const registrationId = this.getAttribute('data-registration-id');
+            const newStatus = this.getAttribute('data-status');
+            const statusBadgeElement = document.querySelector(`.status-badge[data-registration-id="${registrationId}"]`);
+            
+            // Send AJAX request to update status
+            fetch(`{{ url_for('update_registration_status', registration_id=0) }}`.replace('0', registrationId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: newStatus }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update badge in UI
+                    let badgeClass = '';
+                    let badgeText = '';
+                    
+                    switch (newStatus) {
+                        case 'registered':
+                            badgeClass = 'bg-success';
+                            badgeText = 'Đã đăng ký';
+                            break;
+                        case 'attended':
+                            badgeClass = 'bg-primary';
+                            badgeText = 'Đã tham gia';
+                            break;
+                        case 'canceled':
+                            badgeClass = 'bg-danger';
+                            badgeText = 'Đã hủy';
+                            break;
+                    }
+                    
+                    statusBadgeElement.innerHTML = `<span class="badge ${badgeClass}">${badgeText}</span>`;
+                } else {
+                    alert('Có lỗi xảy ra khi cập nhật trạng thái.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi cập nhật trạng thái.');
+            });
+        });
+    });
+    
+    // Export to CSV
+    document.getElementById('exportBtn').addEventListener('click', function() {
+        // Get table data
+        const table = document.getElementById('registrationsTable');
+        const rows = table.querySelectorAll('tbody tr');
+        
+        let csv = 'STT,Họ tên,Email,Thời gian đăng ký,Trạng thái\n';
+        
+        rows.forEach(function(row, index) {
+            const cells = row.querySelectorAll('td');
+            if (cells.length > 1) { // Skip empty message row
+                const name = cells[1].querySelector('.fw-bold').innerText;
+                const email = cells[2].innerText;
+                const time = cells[3].innerText;
+                const status = cells[4].innerText;
+                
+                csv += `${index + 1},"${name}","${email}","${time}","${status}"\n`;
+            }
+        });
+        
+        // Create download link
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `danh-sach-dang-ky-${formatDateForFilename(new Date())}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+    
+    // Helper function to format date for filename
+    function formatDateForFilename(date) {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}${month}${day}`;
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Hồ sơ người dùng - FIT Alumni{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="card-title text-teal mb-0">Hồ sơ người dùng</h2>
+                        <div>
+                            {% if user.role == 'alumni' %}
+                            <a href="{{ url_for('admin_jobs') }}?alumni_id={{ user.id }}" class="btn btn-teal me-2">
+                                <i class="fas fa-briefcase me-2"></i>Xem tin đăng
+                            </a>
+                            {% endif %}
+                            <a href="{{ url_for('admin_users') }}" class="btn btn-outline-teal">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="avatar-placeholder rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center bg-teal-light text-teal">
+                                <i class="fas fa-user fa-3x"></i>
+                            </div>
+                            <h4 class="text-teal">{{ user.name }}</h4>
+                            <p class="text-muted mb-0">{{ user.email }}</p>
+                            <span class="badge bg-teal mt-2">{{ user.role|title }}</span>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <h5 class="text-teal">Thông tin cơ bản</h5>
+                                    <p class="mb-2"><strong>Vai trò:</strong> {{ user.role|title }}</p>
+                                    <p class="mb-2"><strong>Ngày tham gia:</strong> {{ user.created_at.strftime('%d/%m/%Y') }}</p>
+                                    {% if user.profile %}
+                                        {% if user.profile.phone %}
+                                        <p class="mb-2"><strong>Điện thoại:</strong> {{ user.profile.phone }}</p>
+                                        {% endif %}
+                                        {% if user.profile.company %}
+                                        <p class="mb-2"><strong>Công ty:</strong> {{ user.profile.company }}</p>
+                                        {% endif %}
+                                        {% if user.profile.position %}
+                                        <p class="mb-2"><strong>Vị trí:</strong> {{ user.profile.position }}</p>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h5 class="text-teal">Thống kê</h5>
+                                    <p class="mb-2"><strong>Số tin đăng:</strong> {{ user.jobs|length }}</p>
+                                    <p class="mb-2"><strong>Số đơn ứng tuyển:</strong> {{ user.applications|length }}</p>
+                                    {% if user.education %}
+                                    <p class="mb-2"><strong>Số bằng cấp:</strong> {{ user.education|length }}</p>
+                                    {% endif %}
+                                    {% if user.experience %}
+                                    <p class="mb-2"><strong>Số kinh nghiệm:</strong> {{ user.experience|length }}</p>
+                                    {% endif %}
+                                    {% if user.skills %}
+                                    <p class="mb-2"><strong>Số kỹ năng:</strong> {{ user.skills|length }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-placeholder {
+    width: 150px;
+    height: 150px;
+}
+</style>
+{% endblock %} 

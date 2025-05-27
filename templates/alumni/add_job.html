@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng tin tuyển dụng - FIT Alumni{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-briefcase me-2"></i>Đăng tin tuyển dụng mới
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.csrf_token }}
+                        
+                        <!-- Thông tin cơ bản -->
+                        <h5 class="border-bottom pb-2 mb-4">Thông tin cơ bản</h5>
+                        
+                        <!-- Tiêu đề -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Tiêu đề <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                {{ form.title(class="form-control", placeholder="Ví dụ: Tuyển dụng Lập trình viên Python") }}
+                                {% if form.title.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.title.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Công ty -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Tên công ty <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                {{ form.company_name(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <!-- Logo công ty -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Logo công ty</label>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                    {{ form.company_logo(class="form-control") }}
+                                    <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('company_logo').value = ''">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Hỗ trợ: JPG, PNG (Tối đa 2MB)</div>
+                            </div>
+                        </div>
+
+                        <!-- Địa điểm -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Địa điểm <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                {{ form.location(class="form-control", placeholder="Ví dụ: Quận 5, TP.HCM") }}
+                            </div>
+                        </div>
+
+                        <!-- Chi tiết công việc -->
+                        <h5 class="border-bottom pb-2 mb-4 mt-5">Chi tiết công việc</h5>
+
+                        <!-- Loại công việc -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="job_type" class="form-label">Loại công việc <span class="text-danger">*</span></label>
+                                <select class="form-select" id="job_type" name="job_type" required>
+                                    <option value="">Chọn loại công việc</option>
+                                    {% for job_type in job_types %}
+                                    <option value="{{ job_type }}">{{ job_type }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="experience" class="form-label">Kinh nghiệm</label>
+                                <select class="form-select" id="experience" name="experience">
+                                    <option value="">Chọn yêu cầu kinh nghiệm</option>
+                                    {% for level in levels %}
+                                    <option value="{{ level }}">{{ level }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Mức lương -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Mức lương</label>
+                            <div class="col-sm-9">
+                                <div class="row g-2" id="standard-salary-inputs">
+                                    <div class="col-md-5">
+                                        {{ form.salary_min(class="form-control", placeholder="Tối thiểu (nhập tùy ý)") }}
+                                    </div>
+                                    <div class="col-md-5">
+                                        {{ form.salary_max(class="form-control", placeholder="Tối đa (nhập tùy ý)") }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ form.salary_currency(class="form-select") }}
+                                    </div>
+                                </div>
+                                <div class="form-text mt-2">Bạn có thể nhập mức lương tùy ý, ví dụ: "15 triệu", "1000$", "Cạnh tranh"...</div>
+                                
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="custom_salary_toggle">
+                                    <label class="form-check-label" for="custom_salary_toggle">
+                                        Nhập mức lương tùy ý
+                                    </label>
+                                </div>
+                                
+                                <div class="mt-2" id="custom-salary-input" style="display: none;">
+                                    <input type="text" class="form-control" id="custom_salary" name="custom_salary" placeholder="Nhập mức lương tùy ý (VD: 15-20 triệu, Theo thỏa thuận, v.v...)">
+                                </div>
+                                
+                                <div class="form-check mt-2">
+                                    {{ form.salary_negotiable(class="form-check-input") }}
+                                    <label class="form-check-label" for="salary_negotiable">
+                                        Thương lượng
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Số lượng cần tuyển -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="work_type" class="form-label">Hình thức làm việc</label>
+                                <select class="form-select" id="work_type" name="work_type">
+                                    <option value="">Chọn hình thức làm việc</option>
+                                    {% for work_type in work_types %}
+                                    <option value="{{ work_type }}">{{ work_type }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="positions" class="form-label">Số lượng cần tuyển</label>
+                                <input type="number" class="form-control" id="positions" name="positions" min="1" value="1">
+                            </div>
+                        </div>
+
+                        <!-- Mô tả công việc -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Mô tả công việc <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                {{ form.description(class="form-control", rows="5", placeholder="Mô tả chi tiết về công việc, trách nhiệm...") }}
+                            </div>
+                        </div>
+
+                        <!-- Yêu cầu -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Yêu cầu ứng viên <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                {{ form.requirements(class="form-control", rows="5", placeholder="Các yêu cầu về kỹ năng, bằng cấp...") }}
+                            </div>
+                        </div>
+
+                        <!-- Quyền lợi -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Quyền lợi</label>
+                            <div class="col-sm-9">
+                                {{ form.benefits(class="form-control", rows="5", placeholder="Các quyền lợi, chế độ đãi ngộ...") }}
+                            </div>
+                        </div>
+
+                        <!-- Thời hạn -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Hạn nộp hồ sơ</label>
+                            <div class="col-sm-9">
+                                {{ form.deadline(class="form-control", type="date") }}
+                            </div>
+                        </div>
+
+                        <!-- Liên hệ -->
+                        <h5 class="border-bottom pb-2 mb-4 mt-5">Thông tin liên hệ</h5>
+
+                        <!-- Người liên hệ -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Người liên hệ</label>
+                            <div class="col-sm-9">
+                                {{ form.contact_name(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Email liên hệ <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                {{ form.contact_email(class="form-control", type="email") }}
+                            </div>
+                        </div>
+
+                        <!-- Điện thoại -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label text-sm-end">Số điện thoại</label>
+                            <div class="col-sm-9">
+                                {{ form.contact_phone(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-paper-plane me-1"></i>Đăng tin
+                                </button>
+                                <a href="{{ url_for('alumni_jobs') }}" class="btn btn-light">
+                                    <i class="fas fa-times me-1"></i>Hủy
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý chuyển đổi giữa chế độ nhập lương tiêu chuẩn và tùy ý
+    const customSalaryToggle = document.getElementById('custom_salary_toggle');
+    const standardSalaryInputs = document.getElementById('standard-salary-inputs');
+    const customSalaryInput = document.getElementById('custom-salary-input');
+    const salaryNegotiableCheck = document.getElementById('salary_negotiable');
+    
+    // Khi người dùng chọn chế độ nhập tùy ý
+    customSalaryToggle.addEventListener('change', function() {
+        if (this.checked) {
+            standardSalaryInputs.style.display = 'none';
+            customSalaryInput.style.display = 'block';
+            // Xóa giá trị trong các trường nhập tiêu chuẩn
+            document.getElementById('salary_min').value = '';
+            document.getElementById('salary_max').value = '';
+            // Bỏ chọn thương lượng nếu đang chọn
+            salaryNegotiableCheck.checked = false;
+        } else {
+            standardSalaryInputs.style.display = 'flex';
+            customSalaryInput.style.display = 'none';
+            // Xóa giá trị trong trường nhập tùy ý
+            document.getElementById('custom_salary').value = '';
+        }
+    });
+    
+    // Khi người dùng chọn thương lượng
+    salaryNegotiableCheck.addEventListener('change', function() {
+        if (this.checked) {
+            // Bỏ chọn và ẩn chế độ nhập tùy ý
+            customSalaryToggle.checked = false;
+            standardSalaryInputs.style.display = 'flex';
+            customSalaryInput.style.display = 'none';
+            // Xóa giá trị trong các trường nhập
+            document.getElementById('salary_min').value = '';
+            document.getElementById('salary_max').value = '';
+            document.getElementById('custom_salary').value = '';
+        }
+    });
+});
+</script>
+{% endblock %} 

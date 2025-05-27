@@ -1,0 +1,619 @@
+{% extends "base.html" %}
+
+{% block title %}Đơn ứng tuyển của tôi - FIT Alumni{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f8f9fa;
+        background-image: url('https://cdn.tapchitoaan.vn/media/images/ad(1).jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+
+    .container {
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 30px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header {
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .page-title {
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 0;
+    }
+
+    .stats-card {
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stats-card .card-body {
+        padding: 20px;
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    }
+
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+    }
+
+    .stats-icon.total {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+    }
+
+    .stats-icon.pending {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    .stats-icon.accepted {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+
+    .stats-icon.rejected {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .stats-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: #2d3748;
+    }
+
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .application-card {
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .application-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .application-card .card-header {
+        background: linear-gradient(to right, #f8f9fa, #ffffff);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 15px 20px;
+    }
+
+    .application-card .card-body {
+        padding: 20px;
+    }
+
+    .company-logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        object-fit: contain;
+        background-color: #f8f9fa;
+        padding: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .company-logo-placeholder {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .job-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 5px;
+        transition: all 0.2s ease;
+    }
+
+    .job-title:hover {
+        color: #0d6efd;
+    }
+
+    .company-name {
+        font-size: 0.95rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+
+    .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .job-meta-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .job-meta-item i {
+        margin-right: 5px;
+        color: #0d6efd;
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .status-badge i {
+        margin-right: 5px;
+    }
+
+    .status-pending {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    .status-accepted {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+
+    .status-rejected {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .application-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .application-actions .btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s ease;
+    }
+
+    .application-actions .btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .application-actions .btn-outline-primary {
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+
+    .application-actions .btn-outline-primary:hover {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+
+    .application-actions .btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    .application-actions .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 0;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: #adb5bd;
+        margin-bottom: 20px;
+    }
+
+    .empty-state-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 10px;
+    }
+
+    .empty-state-text {
+        color: #6c757d;
+        margin-bottom: 20px;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .modal-content {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .modal-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .resume-preview {
+        width: 100%;
+        height: 500px;
+        border: none;
+    }
+
+    .filter-section {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .filter-section .form-select,
+    .filter-section .form-control {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    .filter-section .input-group-text {
+        border-radius: 8px 0 0 8px;
+        border: 1px solid #dee2e6;
+        border-right: none;
+        background-color: #fff;
+    }
+
+    .pagination {
+        margin-top: 30px;
+        justify-content: center;
+    }
+
+    .pagination .page-link {
+        border-radius: 8px;
+        margin: 0 3px;
+        color: #0d6efd;
+        border: 1px solid #dee2e6;
+        padding: 8px 16px;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h1 class="page-title">Đơn ứng tuyển của tôi</h1>
+        <a href="{{ url_for('jobs') }}" class="btn btn-primary">
+            <i class="fas fa-search me-2"></i>Tìm việc mới
+        </a>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-4">
+            <div class="stats-card fade-in">
+                <div class="card-body">
+                    <div class="stats-icon total">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stats-value">{{ applications|length }}</div>
+                    <div class="stats-label">Tổng đơn</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="stats-card fade-in">
+                <div class="card-body">
+                    <div class="stats-icon pending">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stats-value">{{ applications|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+                    <div class="stats-label">Đang chờ</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="stats-card fade-in">
+                <div class="card-body">
+                    <div class="stats-icon accepted">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stats-value">{{ applications|selectattr('status', 'equalto', 'accepted')|list|length }}</div>
+                    <div class="stats-label">Đã chấp nhận</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="stats-card fade-in">
+                <div class="card-body">
+                    <div class="stats-icon rejected">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stats-value">{{ applications|selectattr('status', 'equalto', 'rejected')|list|length }}</div>
+                    <div class="stats-label">Đã từ chối</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section fade-in">
+        <form id="filterForm" class="row g-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" name="search" placeholder="Tìm kiếm công việc..." value="{{ request.args.get('search', '') }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="status">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Đang chờ</option>
+                    <option value="accepted" {% if request.args.get('status') == 'accepted' %}selected{% endif %}>Đã chấp nhận</option>
+                    <option value="rejected" {% if request.args.get('status') == 'rejected' %}selected{% endif %}>Đã từ chối</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="sort">
+                    <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Mới nhất</option>
+                    <option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>Cũ nhất</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter me-2"></i>Lọc
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if applications %}
+        {% for application in applications %}
+        <div class="application-card fade-in">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <span class="status-badge status-{{ application.status }}">
+                        {% if application.status == 'pending' %}
+                            <i class="fas fa-clock"></i> Đang chờ
+                        {% elif application.status == 'accepted' %}
+                            <i class="fas fa-check-circle"></i> Đã chấp nhận
+                        {% elif application.status == 'rejected' %}
+                            <i class="fas fa-times-circle"></i> Đã từ chối
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="text-muted small">
+                    <i class="far fa-calendar-alt me-1"></i>Nộp ngày {{ application.created_at.strftime('%d/%m/%Y') }}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2 text-center mb-3 mb-md-0">
+                        {% if application.job.company_logo %}
+                            <img src="{{ url_for('static', filename='uploads/company_logos/' + application.job.company_logo) }}" 
+                                 class="company-logo" alt="{{ application.job.company_name }}">
+                        {% else %}
+                            <div class="company-logo-placeholder">
+                                <i class="fas fa-building"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-7 mb-3 mb-md-0">
+                        <a href="{{ url_for('job_detail', job_id=application.job.id) }}" class="text-decoration-none">
+                            <h5 class="job-title">{{ application.job.title }}</h5>
+                        </a>
+                        <div class="company-name">{{ application.job.company_name }}</div>
+                        <div class="job-meta">
+                            <div class="job-meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                {{ application.job.location }}
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-briefcase"></i>
+                                {{ application.job.job_type or 'Không xác định' }}
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-money-bill-wave"></i>
+                                {{ application.job.salary_display or 'Thương lượng' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-md-end">
+                        <div class="application-actions">
+                            <button type="button" class="btn btn-outline-primary" 
+                                    onclick="showResumePreview('{{ url_for('static', filename='uploads/resumes/' + application.resume_path) }}')">
+                                <i class="fas fa-file-alt"></i> Xem CV
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" 
+                                    data-bs-toggle="modal" data-bs-target="#withdrawModal{{ application.id }}">
+                                <i class="fas fa-trash-alt"></i> Hủy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdraw Modal -->
+        <div class="modal fade" id="withdrawModal{{ application.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Xác nhận hủy đơn</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn hủy đơn ứng tuyển cho vị trí <strong>{{ application.job.title }}</strong> tại <strong>{{ application.job.company_name }}</strong> không?</p>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Hành động này không thể hoàn tác. Nếu bạn muốn ứng tuyển lại, bạn sẽ cần nộp đơn mới.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <form action="{{ url_for('withdraw_application', application_id=application.id) }}" method="POST">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt me-2"></i>Hủy đơn
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    {% else %}
+        <div class="empty-state fade-in">
+            <div class="empty-state-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <h3 class="empty-state-title">Chưa có đơn ứng tuyển nào</h3>
+            <p class="empty-state-text">
+                Bạn chưa ứng tuyển vào bất kỳ công việc nào. Hãy khám phá các cơ hội việc làm mới và bắt đầu sự nghiệp của bạn!
+            </p>
+            <a href="{{ url_for('jobs') }}" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i>Tìm kiếm việc làm
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Resume Preview Modal -->
+<div class="modal fade" id="resumePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xem trước CV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <iframe id="resumeFrame" class="resume-preview" title="Resume Preview"></iframe>
+            </div>
+            <div class="modal-footer">
+                <a id="downloadResumeLink" href="#" class="btn btn-primary" download>
+                    <i class="fas fa-download me-2"></i>Tải xuống
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter form submission
+        const filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            filterForm.addEventListener('change', function() {
+                this.submit();
+            });
+        }
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+    
+    // Function to show resume preview
+    function showResumePreview(resumeUrl) {
+        const modal = new bootstrap.Modal(document.getElementById('resumePreviewModal'));
+        const resumeFrame = document.getElementById('resumeFrame');
+        const downloadLink = document.getElementById('downloadResumeLink');
+        
+        resumeFrame.src = resumeUrl;
+        downloadLink.href = resumeUrl;
+        
+        modal.show();
+    }
+</script>
+{% endblock %} 
